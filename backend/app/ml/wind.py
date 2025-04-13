@@ -7,7 +7,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 import os
 
 # Load and preprocess data
-df = pd.read_csv('wind_data.csv')
+df = pd.read_csv(r'C:\GreenPlacement\backend\app\ml\wind_data.csv')
 df = df.dropna(subset=['Wspd', 'Wdir', 'Etmp', 'Patv'])
 
 X = df[['Wspd', 'Wdir', 'Etmp']]
@@ -26,4 +26,4 @@ print("R²:", r2_score(y_test, y_pred))
 # Save model
 output_path = os.path.join(os.path.dirname(__file__), 'wind_turbine_model.pkl')
 joblib.dump(model, output_path)
-print(f"✅ Model saved to {output_path}")
+print(f"Model saved to {output_path}")
