@@ -156,5 +156,3 @@ async def predict_solar_forecast(request: Request):
             })
 
     return forecast
-
-
