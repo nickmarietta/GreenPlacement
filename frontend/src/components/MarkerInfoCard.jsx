@@ -4,7 +4,8 @@ import { useMapData } from "../pages/MapPage";
 
 const MarkerInfoCard = ({ id, marker }) => {
   const { markers, setMarkers } = useMapData();
-  const markerNameRef = useRef("New Marker");
+  const inputRef = useRef(null);
+  const [tempName, setTempName] = useState("New Marker");
   const [editting, isEditting] = useState(false);
   const [show, toggleShow] = useState(false);
   console.log("marker = ", marker);
@@ -18,19 +19,34 @@ const MarkerInfoCard = ({ id, marker }) => {
     toggleShow(!show);
   };
 
+  // Delete entire marker from state array
   const handleDeleteMarker = () => {
-    const newMarkers = [...markers];
-    newMarkers.splice(id, 1);
-    setMarkers(newMarkers);
+    setMarkers(markers.filter((m) => m !== marker));
   };
 
-  const handleEditMarkerName = () => {
-    markerNameRef.current;
+  // Start editting marker name
+  const handleEditting = () => {
+    setTempName(marker.markerName || "New Marker");
+    isEditting(true);
   };
+  useEffect(() => {
+    if (editting && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [editting]);
 
-  const handleDiscardMarkerEdit = () => {
+  // Accept name change
+  const handleChangeMarkerName = () => {
+    setMarkers(
+      markers.map((m) => (m === marker ? { ...m, markerName: tempName } : m))
+    );
     isEditting(false);
-    markerNameRef.current = "Discarded edit";
+  };
+
+  // Delete name changes
+  const handleDiscardMarkerEdit = () => {
+    setTempName(marker.markerName);
+    isEditting(false);
   };
 
   return (
@@ -41,33 +57,34 @@ const MarkerInfoCard = ({ id, marker }) => {
             <>
               <button
                 className="cursor-pointer text-xs"
-                onClick={handleEditMarkerName}
+                onClick={handleChangeMarkerName}
               >
                 ✅
               </button>
               <input
-                ref={markerNameRef}
+                ref={inputRef}
                 className="rounded-lg p-2 bg-blue-200 w-full"
-                placeholder={markerNameRef.current}
+                onChange={(e) => setTempName(e.target.value)}
+                value={tempName}
               />
             </>
           ) : (
             <>
               <button
                 className="cursor-pointer text-xs"
-                onClick={() => isEditting(true)}
+                onClick={handleEditting}
               >
                 ✏️
               </button>
-              <h2 className="rounded-full p-2 bg-blue-200">
-                {markerNameRef.current}
+              <h2 className="rounded-full w-full p-2 bg-blue-200">
+                {marker.markerName || "New Marker"}
               </h2>
             </>
           )}
           <button
             className="cursor-pointer text-xs"
             onClick={() =>
-              editting ? handleDiscardMarkerEdit : handleDeleteMarker
+              editting ? handleDiscardMarkerEdit() : handleDeleteMarker()
             }
           >
             ❌
