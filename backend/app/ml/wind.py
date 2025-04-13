@@ -26,4 +26,4 @@ print("R²:", r2_score(y_test, y_pred))
 # Save model
 output_path = os.path.join(os.path.dirname(__file__), 'wind_turbine_model.pkl')
 joblib.dump(model, output_path)
-print(f"✅ Model saved to {output_path}")
+print(f"Model saved to {output_path}")
