@@ -3,9 +3,16 @@ import React, { useEffect, useState } from "react";
 import { useMapData } from "../pages/MapPage";
 import EnergyForecast from "./EnergyForecast";
 import Loading from "./Loading";
+import MarkerInfoCard from "./MarkerInfoCard";
 
 const InfoPanel = () => {
-  const { coordinates, energySource, setEnergySource } = useMapData();
+  const {
+    coordinates,
+    setCoordinates,
+    energySource,
+    setEnergySource,
+    markers,
+  } = useMapData();
   const [predictedOutput, setPredictedOutput] = useState(null);
   const [loading, isLoading] = useState(false);
 
@@ -36,8 +43,11 @@ const InfoPanel = () => {
 
   const handleCalculateEnergyOutput = async () => {
     if (!coordinates || coordinates.length < 2) {
-      alert("Coordinates not selected. Please place a marker on the map.");
+      alert("❗Coordinates not selected. Please place a marker on the map.");
       return;
+    }
+    if (markers.length < 1) {
+      alert("❗No marker created. Please select an energy source.");
     }
 
     const [lng, lat] = coordinates;
@@ -45,11 +55,13 @@ const InfoPanel = () => {
 
     try {
       isLoading(true);
+      // Step 1: Get weather features from your FastAPI backend
       const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lngLat: [lng, lat] }),
       });
+
 
       const weatherData = await weatherRes.json();
       console.log("🌦 Weather response:", weatherData);
@@ -58,6 +70,7 @@ const InfoPanel = () => {
         throw new Error(weatherData.error || "Failed to get weather data.");
       }
 
+      // Step 2: Send features to prediction endpoint
       const predictionRes = await fetch("http://localhost:8000/api/predict/wind", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -86,7 +99,7 @@ const InfoPanel = () => {
   };
 
   return (
-    <div className="w-1/2 bg-gray-300 p-2 flex flex-col gap-2">
+    <div className="w-1/2 bg-gray-300 p-2 flex flex-col gap-2 overflow-y-auto h-screen">
       <div className="flex flex-col gap-2 bg-gray-100 rounded-lg p-2">
         <p className="text-gray-500 text-sm">Tool box</p>
         <div className="flex gap-2 justify-center">
@@ -112,7 +125,6 @@ const InfoPanel = () => {
           </button>
         </div>
       </div>
-
       <div className="bg-gray-100 rounded-lg p-2">
         <p className="text-gray-500 text-sm">Coordinates</p>
         {coordinates?.map((coord, index) => (
@@ -123,7 +135,6 @@ const InfoPanel = () => {
           </p>
         ))}
       </div>
-
       <div className="flex justify-center flex-col gap-2">
         <button
           className="bg-green-300 p-2 rounded-full cursor-pointer"
@@ -134,12 +145,13 @@ const InfoPanel = () => {
         <div className="flex justify-center">{loading && <Loading />}</div>
       </div>
 
-      {predictedOutput && (
-        <div className="bg-gray-100 rounded-lg p-2">
-          <p className="text-gray-500 text-sm">Results</p>
-          <p>⚡ {predictedOutput} kW</p>
-        </div>
-      )}
+      {markers.map((_, index) => (
+        <MarkerInfoCard
+          key={`marker-${index}`}
+          predictedOutput={predictedOutput}
+          id={index}
+        />
+      ))}
 
       {/* Forecast chart popout toggle */}
       <EnergyForecast coordinates={coordinates} />
