@@ -29,8 +29,8 @@ async def get_weather_features(request: Request):
         current = weather_data["current"]
 
         return {
-            "Wspd": current.get("wind_kph") / 3.6,   # Wind speed in kph
-            "Wdir": current.get("wind_degree"),
+            "Wspd": current.get("wind_kph") / 3.6,   # Wind speed in
+            "Wdir": current.get("wind_degree") - 180,
             "Etmp": current.get("temp_c")      # Temperature in Celsius
         }
 
