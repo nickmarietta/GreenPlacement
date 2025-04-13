@@ -48,6 +48,11 @@ async def get_solar_features(request: Request):
     zenith = solpos['zenith'].values[0]
     azimuth = solpos['azimuth'].values[0]
 
+    if zenith > 90:
+        zenith = 45.0  # Midday approximation
+        azimuth = 180.0  # South
+        simulated = True
+
     # Assume surface is flat and facing south (tilt=30°, azimuth=180°)
     angle_of_incidence = pvlib.irradiance.aoi(30, 180, zenith, azimuth)
 
@@ -117,6 +122,12 @@ async def predict_solar_forecast(request: Request):
             solpos = pvlib.solarposition.get_solarposition(target_datetime, lat, lng)
             zenith = solpos['zenith'].values[0]
             azimuth = solpos['azimuth'].values[0]
+
+            # Simulate daytime solar geometry if sun is below the horizon
+            if zenith > 90:
+                zenith = 45.0  # Approx midday sun
+                azimuth = 180.0  # Facing south
+
             angle_of_incidence = pvlib.irradiance.aoi(30, 180, zenith, azimuth)
 
             # Derived features
@@ -135,13 +146,10 @@ async def predict_solar_forecast(request: Request):
                 clear_sky_score
             ]])
 
-            if zenith > 90:
-                predicted = 0.0
-            else:
-                scaled = scaler_X.transform(features)
-                prediction_scaled = model.predict(scaled)
-                prediction = scaler_y.inverse_transform(prediction_scaled)[0][0]
-                predicted = float(max(0.0, round(prediction, 2) * 8))
+            scaled = scaler_X.transform(features)
+            prediction_scaled = model.predict(scaled)
+            prediction = scaler_y.inverse_transform(prediction_scaled)[0][0]
+            predicted = float(max(0.0, round(prediction, 2) * 8))
 
             forecast.append({
                 "day": f"Day {days_ahead}",

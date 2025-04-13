@@ -54,6 +54,21 @@ const EnergyForecast = ({
     return null;
   })();
 
+  const costOverTimeData = [
+    { year: 2013, Wind: 80, Solar: 150, Nuclear: 100 },
+    { year: 2015, Wind: 65, Solar: 120, Nuclear: 95 },
+    { year: 2017, Wind: 50, Solar: 80, Nuclear: 90 },
+    { year: 2019, Wind: 40, Solar: 50, Nuclear: 90 },
+    { year: 2021, Wind: 30, Solar: 40, Nuclear: 88 },
+    { year: 2023, Wind: 25, Solar: 35, Nuclear: 85 },
+  ];
+  const emissionsPerKWhData = [
+    { source: "Coal", CO2: 820 },
+    { source: "Natural Gas", CO2: 490 },
+    { source: "Wind", CO2: 11 },
+    { source: "Solar", CO2: 41 },
+  ];
+
   useEffect(() => {
     const fetchForecasts = async () => {
       if (!coordinates || coordinates.length !== 2) return;
@@ -140,57 +155,81 @@ const EnergyForecast = ({
         </div>
       ) : (
         showForecast && (
-          <div className="fixed top-0 left-0 w-full h-full bg-white z-50 p-4 overflow-auto">
-            <button
-              className="absolute top-4 right-4 text-lg"
-              onClick={() => setShowForecast(false)}
-            >
-              ✖
-            </button>
+        <div className="fixed top-0 left-0 w-full h-full bg-white z-50 p-4 overflow-hidden">
+          <button
+            className="absolute top-4 right-4 text-lg"
+            onClick={() => setShowForecast(false)}
+          >
+            ✖
+          </button>
 
-            <h2 className="text-xl mb-4">📈 Energy Output Forecast (300 Days)</h2>
-            <ResponsiveContainer width="100%" height={350}>
-              <LineChart data={data} margin={{ top: 20, right: 30, left: 50, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day">
-                  <Label value="Days" position="insideBottom" offset={-15} />
-                </XAxis>
-                <YAxis>
-                  <Label
-                    value="Energy Output (kW)"
-                    angle={-90}
-                    position="insideLeft"
-                    offset={-20}
-                  />
-                </YAxis>
-                <Tooltip />
-                <Legend
-                  verticalAlign="bottom"
-                  align="center"
-                  wrapperStyle={{ paddingTop: 20 }}
-                />
-                <Line type="monotone" dataKey="wind" stroke="#1f77b4" name="Wind Output" />
-                <Line type="monotone" dataKey="solar" stroke="#ff7f0e" name="Solar Output" />
-              </LineChart>
-            </ResponsiveContainer>
+          <h2 className="text-xl mb-4 text-center">📊 Comparative Visualizations</h2>
+          <div className="grid grid-cols-2 grid-rows-2 gap-4 h-[85vh]">
+            {/* Top Left - Line Chart: Energy Forecast */}
+            <div className="bg-gray-100 p-2 rounded-lg">
+              <h3 className="text-md font-semibold text-center">📈 300-Day Forecast</h3>
+              <ResponsiveContainer width="100%" height="90%">
+                <LineChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="day" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="wind" stroke="#1f77b4" name="Wind" />
+                  <Line type="monotone" dataKey="solar" stroke="#ff7f0e" name="Solar" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
 
-            {sustainabilityBarData.length > 0 && (
-              <>
-                <h2 className="text-xl mt-8 mb-4">🌿 Sustainability Comparison</h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={sustainabilityBarData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="metric" />
-                    <YAxis domain={[0, 10]} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="Wind" fill="#1f77b4" />
-                    <Bar dataKey="Solar" fill="#ff7f0e" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </>
-            )}
+            {/* Top Right - Bar Chart: Emissions */}
+            <div className="bg-gray-100 p-2 rounded-lg">
+              <h3 className="text-md font-semibold text-center">🌍 CO₂ Emissions per kWh</h3>
+              <ResponsiveContainer width="100%" height="90%">
+                <BarChart data={emissionsPerKWhData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="source" />
+                  <YAxis label={{ value: "gCO₂/kWh", angle: -90, position: "insideLeft", dy: 40 }} />
+                  <Tooltip />
+                  <Bar dataKey="CO2" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Bottom Left - Bar Chart: Sustainability */}
+            <div className="bg-gray-100 p-2 rounded-lg">
+              <h3 className="text-md font-semibold text-center">🌿 Sustainability Comparison</h3>
+              <ResponsiveContainer width="100%" height="90%">
+                <BarChart data={sustainabilityBarData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="metric" />
+                  <YAxis domain={[0, 10]} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="Wind" fill="#1f77b4" />
+                  <Bar dataKey="Solar" fill="#ff7f0e" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Bottom Right - Line Chart: Cost Over Time */}
+            <div className="bg-gray-100 p-2 rounded-lg">
+              <h3 className="text-md font-semibold text-center">💵 Cost per MWh Over Time</h3>
+              <ResponsiveContainer width="100%" height="90%">
+                <LineChart data={costOverTimeData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="year" />
+                  <YAxis label={{ value: "$/mWh", angle: -90, position: "insideLeft", dy: 40 }} />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="Wind" stroke="#1f77b4" />
+                  <Line type="monotone" dataKey="Solar" stroke="#ff7f0e" />
+                  <Line type="monotone" dataKey="Nuclear" stroke="#2ca02c" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
+        </div>
+
         )
       )}
     </>
