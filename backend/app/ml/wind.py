@@ -7,7 +7,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 import os
 
 # Load and preprocess data
-df = pd.read_csv(r'C:\GreenPlacement\backend\app\ml\wind_data.csv')
+df = pd.read_csv('wind_data.csv')
 df = df.dropna(subset=['Wspd', 'Wdir', 'Etmp', 'Patv'])
 
 X = df[['Wspd', 'Wdir', 'Etmp']]

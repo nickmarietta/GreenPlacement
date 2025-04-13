@@ -1,8 +1,10 @@
 # main.py
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
-from app.routers.predictor import router as wind_predictor_router
+import httpx
+from app.routers.predictors import router as wind_predictor_router
 from app.routers.weather import router as weather_router
 
 from dotenv import load_dotenv
