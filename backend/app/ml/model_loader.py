@@ -2,7 +2,7 @@ import joblib
 import os
 from tensorflow import keras
 
-from tensorflow.keras.models import load_model  
+from keras.models import load_model  
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -23,6 +23,8 @@ paths = {
 models = {}
 scalers = {}
 try:
+    
+    print("Looking for wind model at:", paths['wind']['model'])
     models['wind'] = joblib.load(paths['wind']['model'])
     scalers['wind'] = joblib.load(paths['wind']['scaler']) if os.path.exists(paths['wind']['scaler']) else None
     print("Wind model and scaler loaded.")
