@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 // Contexts
 import { useMapData } from "../pages/MapPage";
 
-const MarkerInfoCard = ({ id, predictedOutput }) => {
-  const { coordinates, markers, setMarkers } = useMapData();
-  const [markerName, setMarkerName] = useState();
+const MarkerInfoCard = ({ id, marker }) => {
+  const { markers, setMarkers } = useMapData();
+  const markerNameRef = useRef("New Marker");
+  const [editting, isEditting] = useState(false);
   const [show, toggleShow] = useState(false);
-
+  console.log("marker = ", marker);
   useEffect(() => {
-    if (predictedOutput) {
+    if (marker.predictedOutput) {
       toggleShow(true);
     }
-  }, [predictedOutput]);
+  }, [marker]);
 
   const showMarkerInfo = () => {
     toggleShow(!show);
@@ -23,16 +24,51 @@ const MarkerInfoCard = ({ id, predictedOutput }) => {
     setMarkers(newMarkers);
   };
 
+  const handleEditMarkerName = () => {
+    markerNameRef.current;
+  };
+
+  const handleDiscardMarkerEdit = () => {
+    isEditting(false);
+    markerNameRef.current = "Discarded edit";
+  };
+
   return (
     <div className="bg-gray-100 rounded-lg p-2 flex flex-col gap-2">
       <div className="flex gap-2">
         <div className="w-full flex gap-1">
-          <h2 className="rounded-full p-2 bg-blue-200">
-            {markerName || `Marker ${id}`}
-          </h2>
+          {editting ? (
+            <>
+              <button
+                className="cursor-pointer text-xs"
+                onClick={handleEditMarkerName}
+              >
+                ✅
+              </button>
+              <input
+                ref={markerNameRef}
+                className="rounded-lg p-2 bg-blue-200 w-full"
+                placeholder={markerNameRef.current}
+              />
+            </>
+          ) : (
+            <>
+              <button
+                className="cursor-pointer text-xs"
+                onClick={() => isEditting(true)}
+              >
+                ✏️
+              </button>
+              <h2 className="rounded-full p-2 bg-blue-200">
+                {markerNameRef.current}
+              </h2>
+            </>
+          )}
           <button
             className="cursor-pointer text-xs"
-            onClick={handleDeleteMarker}
+            onClick={() =>
+              editting ? handleDiscardMarkerEdit : handleDeleteMarker
+            }
           >
             ❌
           </button>
@@ -43,8 +79,8 @@ const MarkerInfoCard = ({ id, predictedOutput }) => {
               <p className="text-gray-500 text-sm">Coordinates</p>
             </div>
             <div className="flex justify-center gap-1">
-              {coordinates &&
-                coordinates.map((coord, index) => (
+              {marker.lngLat &&
+                marker.lngLat.map((coord, index) => (
                   <p key={`coord-${index}`} className="text-sm">
                     {index == 0
                       ? `( ${coord.toFixed(2)}°,`
@@ -62,8 +98,8 @@ const MarkerInfoCard = ({ id, predictedOutput }) => {
             <p className="text-gray-500 text-sm">Coordinates</p>
           </div>
           <div>
-            {coordinates &&
-              coordinates.map((coord, index) => (
+            {marker.lngLat &&
+              marker.lngLat.map((coord, index) => (
                 <p key={`coord-${index}`} className="ml-2">
                   {index == 0
                     ? `Longitude: ${coord.toFixed(2)}°`
@@ -73,16 +109,16 @@ const MarkerInfoCard = ({ id, predictedOutput }) => {
           </div>
         </div>
       ) : null}
-      {predictedOutput && show && (
+      {marker && marker.predictedOutput && show && (
         <div className="border-t border-gray-500"></div>
       )}
-      {predictedOutput && show && (
+      {marker && marker.predictedOutput && show && (
         <div className="">
           <div>
             <p className="text-gray-500 text-sm">Results</p>
           </div>
           <div>
-            <p>⚡{predictedOutput} kW</p>
+            <p>⚡{marker.predictedOutput.toFixed(0)} kW</p>
           </div>
         </div>
       )}
@@ -90,7 +126,7 @@ const MarkerInfoCard = ({ id, predictedOutput }) => {
         className="w-full text-center text-gray-500 text-sm cursor-pointer"
         onClick={showMarkerInfo}
       >
-        {show ? "^" : predictedOutput ? "v" : null}
+        {show ? "^" : marker && marker.predictedOutput ? "v" : null}
       </button>
     </div>
   );
