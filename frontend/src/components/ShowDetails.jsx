@@ -3,6 +3,9 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label, Legend
 } from "recharts";
 
+const [loading, setLoading] = useState(false);
+
+
 const EnergyForecast = ({ coordinates }) => {
   const [showForecast, setShowForecast] = useState(false);
   const [data, setData] = useState([]);
@@ -11,7 +14,8 @@ const EnergyForecast = ({ coordinates }) => {
     const fetchForecasts = async () => {
       if (!coordinates || coordinates.length !== 2) return;
       const [lng, lat] = coordinates;
-
+  
+      setLoading(true); //Start loading
       try {
         // Step 1: Get wind features
         const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
@@ -55,9 +59,11 @@ const EnergyForecast = ({ coordinates }) => {
         console.log("Combined forecast:", merged);
       } catch (error) {
         console.error("Forecast error:", error);
+      } finally {
+        setLoading(false); //Done loading
       }
     };
-
+  
     if (showForecast) {
       fetchForecasts();
     }
