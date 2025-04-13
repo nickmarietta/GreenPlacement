@@ -10,9 +10,12 @@ export const useMapData = () => {
 
 const MapPage = () => {
   const [coordinates, setCoordinates] = useState([0, 0]);
+  const [energySource, setEnergySource] = useState("");
 
   return (
-    <MapContext.Provider value={{ coordinates, setCoordinates }}>
+    <MapContext.Provider
+      value={{ coordinates, setCoordinates, energySource, setEnergySource }}
+    >
       <div className="flex">
         <InfoPanel />
         <MapBox />

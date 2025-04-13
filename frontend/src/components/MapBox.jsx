@@ -41,7 +41,7 @@ const MapBox = () => {
       <div
         id="map-container"
         ref={mapContainerRef}
-        className="w-screen h-screen"
+        className="w-full h-screen"
       />
     </>
   );
