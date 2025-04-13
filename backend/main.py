@@ -1,7 +1,9 @@
 # main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from predictor import router as wind_predictor_router
+from fastapi import Request
+from app.ml.predictor import router as wind_predictor_router
+
 
 app = FastAPI(
     title="Energy Output Predictor API",
