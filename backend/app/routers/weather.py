@@ -61,8 +61,8 @@ async def forecast_energy_output(request: Request):
             weather = res.json()
 
             day_data = weather["forecast"]["forecastday"][0]["day"]
-            Wspd = day_data["maxwind_kph"]
-            Wdir = 180  # Use default or average — the API doesn't provide daily avg wind dir
+            Wspd = day_data["maxwind_kph"] / 3.6
+            Wdir = day_data["wind_degree"] - 180
             Etmp = day_data["avgtemp_c"]
 
             model = models["wind"]

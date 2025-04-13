@@ -9,20 +9,47 @@ const EnergyForecast = ({ coordinates }) => {
 
   useEffect(() => {
     const fetchForecast = async () => {
-      const res = await fetch("http://localhost:8000/api/predict/forecast", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lngLat: coordinates }),
-      });
+      if (!coordinates || coordinates.length !== 2) return;
 
-      const forecast = await res.json();
-      setData(forecast);
+      const [lng, lat] = coordinates;
+
+      try {
+        // Step 1: Get weather features based on coordinates
+        const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lngLat: [lng, lat] }),
+        });
+
+        const weatherData = await weatherRes.json();
+
+        if (!weatherRes.ok || weatherData.error) {
+          throw new Error(weatherData.error || "Failed to get weather data.");
+        }
+
+        // Step 2: Send those features to forecast prediction
+        const forecastRes = await fetch("http://localhost:8000/api/predict/forecast", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            Wspd: weatherData.Wspd,
+            Wdir: weatherData.Wdir,
+            Etmp: weatherData.Etmp,
+          }),
+        });
+
+        const forecast = await forecastRes.json();
+        setData(forecast);
+        console.log("📈 Updated forecast:", forecast);
+      } catch (error) {
+        console.error("❌ Forecast error:", error);
+      }
     };
 
-    if (showForecast && coordinates.length === 2) {
+    if (showForecast) {
       fetchForecast();
     }
-  }, [showForecast, coordinates]);
+  }, [coordinates, showForecast]);
 
   return (
     <>
