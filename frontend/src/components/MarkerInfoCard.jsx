@@ -43,19 +43,17 @@ const MarkerInfoCard = ({ id, marker }) => {
       markers.map((m) => (m === marker ? { ...m, markerName: tempName } : m))
     );
     isEditting(false);
-
   };
 
   // Delete name changes
   const handleDiscardMarkerEdit = () => {
-
     setTempName(marker.markerName);
     isEditting(false);
   };
 
   return (
     <div className="bg-gray-100 rounded-lg p-2 flex flex-col gap-2">
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-col md:flex-row">
         <div className="w-full flex gap-1 items-center">
           {editting ? (
             <>
@@ -70,28 +68,25 @@ const MarkerInfoCard = ({ id, marker }) => {
                 className="rounded-lg p-2 bg-blue-200 w-full"
                 onChange={(e) => setTempName(e.target.value)}
                 value={tempName}
-
               />
             </>
           ) : (
             <>
               <button
-
                 className="cursor-pointer text-xs"
                 onClick={handleEditting}
               >
                 ✏️
               </button>
-              <h2 className="rounded-full w-full p-2 bg-blue-200">
+              <h2 className="rounded-full w-full p-2 bg-blue-200 truncate">
                 {marker.markerName || "New Marker"}
               </h2>
             </>
           )}
           <button
-            className="text-xs"
+            className="text-xs cursor-pointer"
             onClick={() =>
               editting ? handleDiscardMarkerEdit() : handleDeleteMarker()
-
             }
           >
             ❌
