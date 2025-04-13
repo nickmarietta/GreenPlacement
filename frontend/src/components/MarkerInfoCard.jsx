@@ -5,9 +5,11 @@ import EnergyForecast from "./ShowDetails";
 
 const MarkerInfoCard = ({ id, marker }) => {
   const { markers, setMarkers } = useMapData();
-  const [editing, setEditing] = useState(false);
-  const [markerName, setMarkerName] = useState("New Marker");
-  const [show, setShow] = useState(false);
+  const inputRef = useRef(null);
+  const [tempName, setTempName] = useState("New Marker");
+  const [editting, isEditting] = useState(false);
+  const [show, toggleShow] = useState(false);
+  console.log("marker = ", marker);
 
   useEffect(() => {
     if (marker.predictedOutput) {
@@ -19,19 +21,36 @@ const MarkerInfoCard = ({ id, marker }) => {
     setShow((prev) => !prev);
   };
 
+  // Delete entire marker from state array
   const handleDeleteMarker = () => {
-    const newMarkers = [...markers];
-    newMarkers.splice(id, 1);
-    setMarkers(newMarkers);
+    setMarkers(markers.filter((m) => m !== marker));
   };
 
-  const handleSaveMarkerName = () => {
-    setEditing(false);
+  // Start editting marker name
+  const handleEditting = () => {
+    setTempName(marker.markerName || "New Marker");
+    isEditting(true);
+  };
+  useEffect(() => {
+    if (editting && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [editting]);
+
+  // Accept name change
+  const handleChangeMarkerName = () => {
+    setMarkers(
+      markers.map((m) => (m === marker ? { ...m, markerName: tempName } : m))
+    );
+    isEditting(false);
+
   };
 
+  // Delete name changes
   const handleDiscardMarkerEdit = () => {
-    setEditing(false);
-    setMarkerName("Discarded edit");
+
+    setTempName(marker.markerName);
+    isEditting(false);
   };
 
   return (
@@ -40,30 +59,39 @@ const MarkerInfoCard = ({ id, marker }) => {
         <div className="w-full flex gap-1 items-center">
           {editing ? (
             <>
-              <button className="text-xs" onClick={handleSaveMarkerName}>
+              <button
+                className="cursor-pointer text-xs"
+                onClick={handleChangeMarkerName}
+              >
                 ✅
               </button>
               <input
+                ref={inputRef}
                 className="rounded-lg p-2 bg-blue-200 w-full"
-                value={markerName}
-                onChange={(e) => setMarkerName(e.target.value)}
+                onChange={(e) => setTempName(e.target.value)}
+                value={tempName}
+
               />
             </>
           ) : (
             <>
               <button
-                className="text-xs"
-                onClick={() => setEditing(true)}
+
+                className="cursor-pointer text-xs"
+                onClick={handleEditting}
               >
                 ✏️
               </button>
-              <h2 className="rounded-full p-2 bg-blue-200">{markerName}</h2>
+              <h2 className="rounded-full w-full p-2 bg-blue-200">
+                {marker.markerName || "New Marker"}
+              </h2>
             </>
           )}
           <button
             className="text-xs"
             onClick={() =>
-              editing ? handleDiscardMarkerEdit : handleDeleteMarker()
+              editting ? handleDiscardMarkerEdit() : handleDeleteMarker()
+
             }
           >
             ❌
@@ -106,7 +134,10 @@ const MarkerInfoCard = ({ id, marker }) => {
               <div className="border-t border-gray-500 mt-2"></div>
               <div>
                 <p className="text-gray-500 text-sm">Results</p>
-                <p>⚡ {marker.predictedOutput.toFixed(0)} kW</p>
+                <p>💨 Wind: {marker.predictedOutput.toFixed(0)} kW</p>
+                {marker.predictedSolarOutput !== undefined && (
+                  <p>☀️ Solar: {marker.predictedSolarOutput.toFixed(0)} kW</p>
+                )}
               </div>
               <EnergyForecast coordinates={marker.lngLat} />
             </>
