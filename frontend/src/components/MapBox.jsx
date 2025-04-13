@@ -8,9 +8,9 @@ import { useMapData } from "../pages/MapPage";
 const MapBox = () => {
   const mapRef = useRef();
   const mapContainerRef = useRef();
-  const markerRef = useRef();
 
-  const { coordinates, setCoordinates, energySource } = useMapData();
+  const { coordinates, setCoordinates, energySource, markers, setMarkers } =
+    useMapData();
 
   useEffect(() => {
     mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_API;
@@ -27,22 +27,26 @@ const MapBox = () => {
 
   useEffect(() => {
     if (!mapRef.current) return;
-
-    if (markerRef.current) {
-      markerRef.current.remove();
-    }
-    const marker = new mapboxgl.Marker({
+    // Enforce only one marker (for now)
+    // if (markersRef.current) {
+    //   markersRef.current = [];
+    // }
+    const newMarker = new mapboxgl.Marker({
       draggable: true,
     })
       .setLngLat(coordinates)
       .addTo(mapRef.current);
-    markerRef.current = marker;
+    setMarkers([...markers, newMarker]);
     const getCoordinates = () => {
-      const lngLat = marker.getLngLat();
+      const lngLat = newMarker.getLngLat();
       setCoordinates([lngLat.lng, lngLat.lat]);
     };
-    marker.on("dragend", getCoordinates);
+    newMarker.on("dragend", getCoordinates);
   }, [energySource]);
+
+  useEffect(() => {
+    console.log(markers);
+  }, [markers]);
 
   return (
     <>
