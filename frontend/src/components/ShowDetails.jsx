@@ -206,6 +206,7 @@ const EnergyForecast = ({
               className="absolute top-4 right-4 text-lg"
               onClick={() => setShowForecast(false)}
             >
+              ✖
             </button>
 
             <h2 className="text-xl mb-4 text-center">Comparative Visualizations</h2>
