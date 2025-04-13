@@ -30,7 +30,7 @@ def forecast_energy_output(data: WindInput):
     forecast = []
     for i in range(1, 11):
         simulated_wspd = data.Wspd + i * 0.1
-        simulated_wdir = data.Wdir
+        simulated_wdir = data.Wdir 
         simulated_etmp = data.Etmp + i * 0.2
 
         X = np.array([[simulated_wspd, simulated_wdir, simulated_etmp]])

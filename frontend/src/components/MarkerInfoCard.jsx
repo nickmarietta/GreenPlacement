@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-// Contexts
 import { useMapData } from "../pages/MapPage";
+import EnergyForecast from "./ShowDetails";
 
-const MarkerInfoCard = ({ id, predictedOutput }) => {
-  const { coordinates, markers, setMarkers } = useMapData();
+const MarkerInfoCard = ({ id, predictedOutput, coordinates }) => {
+  const { markers, setMarkers } = useMapData();
   const [markerName, setMarkerName] = useState();
   const [show, toggleShow] = useState(false);
 
@@ -55,9 +55,9 @@ const MarkerInfoCard = ({ id, predictedOutput }) => {
           </div>
         ) : null}
       </div>
-      {/* Alternative coordinate position and show more details */}
-      {show ? (
-        <div className="">
+
+      {show && (
+        <>
           <div>
             <p className="text-gray-500 text-sm">Coordinates</p>
           </div>
@@ -71,21 +71,20 @@ const MarkerInfoCard = ({ id, predictedOutput }) => {
                 </p>
               ))}
           </div>
-        </div>
-      ) : null}
-      {predictedOutput && show && (
-        <div className="border-t border-gray-500"></div>
+        </>
       )}
+
       {predictedOutput && show && (
-        <div className="">
+        <>
+          <div className="border-t border-gray-500"></div>
           <div>
             <p className="text-gray-500 text-sm">Results</p>
-          </div>
-          <div>
             <p>⚡{predictedOutput} kW</p>
           </div>
-        </div>
+          <EnergyForecast coordinates={coordinates} />
+        </>
       )}
+
       <button
         className="w-full text-center text-gray-500 text-sm cursor-pointer"
         onClick={showMarkerInfo}

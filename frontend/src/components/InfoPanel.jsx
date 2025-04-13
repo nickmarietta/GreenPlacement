@@ -43,11 +43,11 @@ const InfoPanel = () => {
 
   const handleCalculateEnergyOutput = async () => {
     if (!coordinates || coordinates.length < 2) {
-      alert("❗Coordinates not selected. Please place a marker on the map.");
+      alert("Coordinates not selected. Please place a marker on the map.");
       return;
     }
     if (markers.length < 1) {
-      alert("❗No marker created. Please select an energy source.");
+      alert("No marker created. Please select an energy source.");
     }
 
     const [lng, lat] = coordinates;
@@ -90,7 +90,7 @@ const InfoPanel = () => {
         alert("Prediction failed.");
       }
     } catch (err) {
-      console.error("❌ Error during prediction flow:", err);
+      console.error("Error during prediction flow:", err);
       alert("An error occurred. Check the console for details.");
     } finally {
       isLoading(false);
@@ -144,17 +144,14 @@ const InfoPanel = () => {
         </button>
         <div className="flex justify-center">{loading && <Loading />}</div>
       </div>
-
-      {markers.map((_, index) => (
-        <MarkerInfoCard
-          key={`marker-${index}`}
-          predictedOutput={predictedOutput}
-          id={index}
-        />
-      ))}
-
-      {/* Forecast chart popout toggle */}
-      <EnergyForecast coordinates={coordinates} />
+        {markers.map((_, index) => (
+          <MarkerInfoCard
+            key={`marker-${index}`}
+            predictedOutput={predictedOutput}
+            id={index}
+            coordinates={coordinates}
+          />
+        ))}
     </div>
   );
 };
