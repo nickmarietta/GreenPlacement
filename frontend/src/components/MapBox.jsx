@@ -1,23 +1,21 @@
-import React, { useEffect, useRef, useState } from "react";
-// Mapbox
+import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-// Contexts
+import { createRoot } from "react-dom/client";
+import RocketMarker from "../components/RocketMarker";
 import { useMapData } from "../pages/MapPage";
 
 const MapBox = () => {
   const mapRef = useRef();
   const mapContainerRef = useRef();
-
-  const { coordinates, setCoordinates, energySource, markers, setMarkers } =
-    useMapData();
+  const { coordinates, setCoordinates, energySource, markers, setMarkers } = useMapData();
 
   useEffect(() => {
     mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_API;
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      center: [0, 0],
-      zoom: 0,
+      center: coordinates,
+      zoom: 1,
     });
 
     return () => {
@@ -28,19 +26,35 @@ const MapBox = () => {
   useEffect(() => {
     if (!mapRef.current) return;
 
-    const newMarker = new mapboxgl.Marker({ draggable: true })
-      .setLngLat([0, 0])
+    // Create the HTML container for the React rocket marker
+    const rocketDiv = document.createElement("div");
+    rocketDiv.style.width = "60px";
+    rocketDiv.style.height = "90px";
+    rocketDiv.style.overflow = "visible";
+
+    // Render the animated rocket component inside the div
+    const root = createRoot(rocketDiv);
+    root.render(<RocketMarker />);
+
+    // Create and add the mapbox marker with custom HTML
+    const placeOn = [coordinates[0] + Math.random() * (0.1 - 0.05) + 0.05, coordinates[1] + Math.random() * (0.1 - 0.05) + 0.05]
+    const newMarker = new mapboxgl.Marker({
+      element: rocketDiv,
+      draggable: true,
+    })
+      .setLngLat(energySource == 1 ? coordinates : placeOn)
       .addTo(mapRef.current);
 
-    setMarkers((prevMarkers) => [
-      ...prevMarkers,
+    setMarkers((prev) => [
+      ...prev,
       {
         marker: newMarker,
-        lngLat: [0, 0],
+        lngLat: energySource == 1 ? coordinates : placeOn,
       },
     ]);
 
-    const getCoordinates = () => {
+    // Drag handling
+    const updateCoordinates = () => {
       const lngLat = newMarker.getLngLat();
       setCoordinates([lngLat.lng, lngLat.lat]);
 
@@ -53,21 +67,15 @@ const MapBox = () => {
       );
     };
 
-    newMarker.on("dragend", getCoordinates);
+    newMarker.on("dragend", updateCoordinates);
   }, [energySource]);
 
-  useEffect(() => {
-    console.log(markers);
-  }, [markers]);
-
   return (
-    <>
-      <div
-        id="map-container"
-        ref={mapContainerRef}
-        className="w-full h-screen"
-      />
-    </>
+    <div
+      id="map-container"
+      ref={mapContainerRef}
+      className="w-full h-screen"
+    />
   );
 };
 

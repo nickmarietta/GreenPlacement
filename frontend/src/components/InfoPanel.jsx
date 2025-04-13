@@ -16,8 +16,8 @@ const InfoPanel = () => {
   } = useMapData();
   const [loading, isLoading] = useState(false);
 
-  const handleAddEnergySource = (source) => {
-    setEnergySource(source);
+  const handleAddEnergySource = () => {
+    setEnergySource((prev) => prev += 1);
   };
 
   const handleCalculateEnergyOutput = async () => {

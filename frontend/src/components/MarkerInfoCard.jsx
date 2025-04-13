@@ -20,6 +20,7 @@ const MarkerInfoCard = ({ id, marker }) => {
   };
 
   const handleDeleteMarker = () => {
+    marker.marker.remove();
     setMarkers(markers.filter((m) => m !== marker));
   };
 
@@ -117,7 +118,7 @@ const MarkerInfoCard = ({ id, marker }) => {
             </>
           )}
           <button
-            className="text-xs"
+            className="text-xs cursor-pointer"
             onClick={() =>
               editting ? handleDiscardMarkerEdit() : handleDeleteMarker()
             }
