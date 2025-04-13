@@ -1,9 +1,15 @@
 # main.py
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
 from app.ml.predictor import router as wind_predictor_router
+from app.routers.weather import router as weather_router
 import httpx
 import os
+
+from dotenv import load_dotenv
+load_dotenv()
+
 
 app = FastAPI(
     title="Energy Output Predictor API",
@@ -28,9 +34,13 @@ app.add_middleware(
 # Include your prediction endpoint(s)
 app.include_router(wind_predictor_router, prefix="/api")
 
+app.include_router(weather_router, prefix="/api")
+
+
 @app.get("/")
 def root():
     return {"message": "Welcome to the Energy Output Predictor API!"}
+
   
 @app.post("/get-features")
 async def get_features(request: Request):
