@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label, Legend
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Label,
+  Legend,
 } from "recharts";
 
-const [loading, setLoading] = useState(false);
-
-
 const EnergyForecast = ({ coordinates }) => {
+  const [loading, setLoading] = useState(false);
   const [showForecast, setShowForecast] = useState(false);
   const [data, setData] = useState([]);
 
@@ -14,37 +20,46 @@ const EnergyForecast = ({ coordinates }) => {
     const fetchForecasts = async () => {
       if (!coordinates || coordinates.length !== 2) return;
       const [lng, lat] = coordinates;
-  
+
       setLoading(true); //Start loading
       try {
         // Step 1: Get wind features
-        const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lngLat: [lng, lat] }),
-        });
+        const weatherRes = await fetch(
+          "http://localhost:8000/api/get-weather-features",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lngLat: [lng, lat] }),
+          }
+        );
 
         const weatherData = await weatherRes.json();
 
         // Step 2: Predict wind forecast
-        const windForecastRes = await fetch("http://localhost:8000/api/predict/forecast", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            Wspd: weatherData.Wspd,
-            Wdir: weatherData.Wdir,
-            Etmp: weatherData.Etmp,
-          }),
-        });
+        const windForecastRes = await fetch(
+          "http://localhost:8000/api/predict/forecast",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              Wspd: weatherData.Wspd,
+              Wdir: weatherData.Wdir,
+              Etmp: weatherData.Etmp,
+            }),
+          }
+        );
 
         const windData = await windForecastRes.json();
 
         // Step 3: Get solar forecast prediction
-        const solarForecastRes = await fetch("http://localhost:8000/api/predict/solar_forecast", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lngLat: [lng, lat] }),
-        });
+        const solarForecastRes = await fetch(
+          "http://localhost:8000/api/predict/solar_forecast",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lngLat: [lng, lat] }),
+          }
+        );
 
         const solarData = await solarForecastRes.json();
 
@@ -63,7 +78,7 @@ const EnergyForecast = ({ coordinates }) => {
         setLoading(false); //Done loading
       }
     };
-  
+
     if (showForecast) {
       fetchForecasts();
     }
@@ -104,13 +119,23 @@ const EnergyForecast = ({ coordinates }) => {
                   angle={-90}
                   position="insideLeft"
                   offset={-20}
-                  style={{ textAnchor: 'middle' }}
+                  style={{ textAnchor: "middle" }}
                 />
               </YAxis>
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="wind" stroke="#1f77b4" name="Wind Output" />
-              <Line type="monotone" dataKey="solar" stroke="#ff7f0e" name="Solar Output" />
+              <Line
+                type="monotone"
+                dataKey="wind"
+                stroke="#1f77b4"
+                name="Wind Output"
+              />
+              <Line
+                type="monotone"
+                dataKey="solar"
+                stroke="#ff7f0e"
+                name="Solar Output"
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
