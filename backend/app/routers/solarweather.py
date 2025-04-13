@@ -48,6 +48,11 @@ async def get_solar_features(request: Request):
     zenith = solpos['zenith'].values[0]
     azimuth = solpos['azimuth'].values[0]
 
+    if zenith > 90:
+        zenith = 45.0  # Midday approximation
+        azimuth = 180.0  # South
+        simulated = True
+
     # Assume surface is flat and facing south (tilt=30°, azimuth=180°)
     angle_of_incidence = pvlib.irradiance.aoi(30, 180, zenith, azimuth)
 
@@ -156,3 +161,5 @@ async def predict_solar_forecast(request: Request):
             })
 
     return forecast
+
+
