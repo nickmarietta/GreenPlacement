@@ -106,7 +106,10 @@ const MarkerInfoCard = ({ id, marker }) => {
               <div className="border-t border-gray-500 mt-2"></div>
               <div>
                 <p className="text-gray-500 text-sm">Results</p>
-                <p>⚡ {marker.predictedOutput.toFixed(0)} kW</p>
+                <p>💨 Wind: {marker.predictedOutput.toFixed(0)} kW</p>
+                {marker.predictedSolarOutput !== undefined && (
+                  <p>☀️ Solar: {marker.predictedSolarOutput.toFixed(0)} kW</p>
+                )}
               </div>
               <EnergyForecast coordinates={marker.lngLat} />
             </>
