@@ -29,3 +29,10 @@ app.include_router(wind_predictor_router, prefix="/api")
 @app.get("/")
 def root():
     return {"message": "Welcome to the Energy Output Predictor API!"}
+  
+@app.post("/get-features")
+async def get_features(request: Request):
+    data = await request.json()
+    lng, lat = data.get("lngLat")
+    return {"lng": lng or None, "lat": lat or None}
+
