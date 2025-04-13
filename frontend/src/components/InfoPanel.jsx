@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 // Contexts
 import { useMapData } from "../pages/MapPage";
-import EnergyForecast from "./EnergyForecast";
+import EnergyForecast from "./ShowDetails";
 import Loading from "./Loading";
 import MarkerInfoCard from "./MarkerInfoCard";
 
@@ -20,7 +20,7 @@ const InfoPanel = () => {
   useEffect(() => {
     const getCoordinateFeatures = async (coordinates) => {
       try {
-        let res = await fetch("/api/get-features", {
+        let res = await fetch("http://localhost:8000/api/get-features", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ lngLat: coordinates }),
@@ -42,98 +42,84 @@ const InfoPanel = () => {
   };
 
   const handleCalculateEnergyOutput = async () => {
-    // Check if a marker exists
     if (markers.length < 1) {
-      alert("❗No marker created. Please select an energy source.");
+      alert("No marker created. Please place a marker first.");
+      return;
     }
-
+  
     markers.forEach((marker) => {
-      const getFeatures = async (marker) => {
+      const getFeatures = async () => {
+        const [lng, lat] = marker.lngLat;
         try {
-          const [lng, lat] = marker.lngLat;
-          console.log("📍 Sending coordinates to API:", { lngLat: [lng, lat] });
           isLoading(true);
-          // Step 1: Get weather features from your FastAPI backend
-          const weatherRes = await fetch(
-            "http://localhost:8000/api/get-weather-features",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ lngLat: [lng, lat] }),
-            }
-          );
-
+  
+          // Get wind features
+          const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lngLat: [lng, lat] }),
+          });
           const weatherData = await weatherRes.json();
-          console.log("🌦 Weather response:", weatherData);
-
-          if (!weatherRes.ok || weatherData.error) {
-            throw new Error(weatherData.error || "Failed to get weather data.");
-          }
-
-          // Step 2: Send features to prediction endpoint
-          const predictionRes = await fetch(
-            "http://localhost:8000/api/predict/wind",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                Wspd: weatherData.Wspd,
-                Wdir: weatherData.Wdir,
-                Etmp: weatherData.Etmp,
-              }),
-            }
+  
+          // Predict wind energy
+          const windRes = await fetch("http://localhost:8000/api/predict/wind", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(weatherData),
+          });
+          const windOutput = await windRes.json();
+  
+          // Get solar features
+          const solarRes = await fetch("http://localhost:8000/api/get-solar-features", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lngLat: [lng, lat] }),
+          });
+          const solarData = await solarRes.json();
+  
+          // Predict solar energy
+          const solarPredictRes = await fetch("http://localhost:8000/api/predict/solar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(solarData),
+          });
+          const solarOutput = await solarPredictRes.json();
+  
+          setMarkers((prev) =>
+            prev.map((m) =>
+              m === marker
+                ? {
+                    ...m,
+                    predictedOutput: windOutput.predicted_power_output,
+                    predictedSolarOutput: solarOutput.predicted_solar_power_kw,
+                  }
+                : m
+            )
           );
-
-          const prediction = await predictionRes.json();
-          console.log("⚡ Prediction response:", prediction);
-
-          if (prediction.predicted_power_output !== undefined) {
-            setMarkers((prev) =>
-              prev.map((m) =>
-                m === marker
-                  ? { ...m, predictedOutput: prediction.predicted_power_output }
-                  : m
-              )
-            );
-          } else {
-            alert("Prediction failed.");
-          }
         } catch (err) {
-          console.error("❌ Error during prediction flow:", err);
-          alert("An error occurred. Check the console for details.");
+          console.error("Prediction error:", err);
+          alert("Prediction failed. See console for details.");
         } finally {
           isLoading(false);
         }
       };
-
-      getFeatures(marker);
+  
+      getFeatures();
     });
   };
+  
+  
 
   return (
     <div className="w-1/2 bg-gray-300 p-2 flex flex-col gap-2 overflow-y-auto h-screen">
       <div className="flex flex-col gap-2 bg-gray-100 rounded-lg p-2">
         <p className="text-gray-500 text-sm">Tool box</p>
-        <div className="flex gap-2 justify-center">
+        <div className="flex justify-center">
           <button
-            className={`bg-white p-2 rounded-full cursor-pointer ${
-              energySource === "wind"
-                ? "outline-2 outline-offset-2 outline-gray-200"
-                : ""
-            }`}
-            onClick={() => handleAddEnergySource("wind")}
+            className="bg-white p-2 rounded-full cursor-pointer"
+            onClick={() => handleAddEnergySource("marker")} // Optional logic if needed
           >
-            Wind turbine
-          </button>
-          <button
-            className={`bg-white p-2 rounded-full cursor-pointer ${
-              energySource === "solar"
-                ? "outline-2 outline-offset-2 outline-gray-200"
-                : ""
-            }`}
-            onClick={() => handleAddEnergySource("solar")}
-          >
-            Solar panel
+            Marker
           </button>
         </div>
       </div>
@@ -159,9 +145,6 @@ const InfoPanel = () => {
       {markers.map((marker, index) => (
         <MarkerInfoCard key={`marker-${index}`} id={index} marker={marker} />
       ))}
-
-      {/* Forecast chart popout toggle */}
-      <EnergyForecast coordinates={coordinates} />
     </div>
   );
 };
