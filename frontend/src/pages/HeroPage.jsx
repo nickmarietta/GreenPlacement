@@ -60,7 +60,7 @@ const HeroPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
       >
-        <h1 className="text-7xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-purple-500">EcoNauts</h1>
+        <h1 className="text-7xl font-extrabold tracking-widest blue-glow">EcoNauts</h1>
       </motion.div>
 
       </motion.div>
@@ -73,6 +73,9 @@ const HeroPage = () => {
         transition={{ repeat: Infinity, duration: 3 }}
       /> 
       }
+      <div className="absolute bottom-[120px] left-40 z-30 bg-white/10 text-white backdrop-blur-sm p-3 rounded-xl border border-white/20 shadow-md w-fit max-w-[200px] text-md">
+        <p>Hello EcoNaut! Ready to go on your first mission?</p>
+      </div>
       {/*Going to add a wit rocket */}
       <motion.img
         src={rocketImg}
