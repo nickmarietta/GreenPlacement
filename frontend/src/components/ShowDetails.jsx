@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label
 } from "recharts";
 
 const EnergyForecast = ({ coordinates }) => {
@@ -14,7 +14,6 @@ const EnergyForecast = ({ coordinates }) => {
       const [lng, lat] = coordinates;
 
       try {
-        // Step 1: Get weather features based on coordinates
         const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -27,7 +26,6 @@ const EnergyForecast = ({ coordinates }) => {
           throw new Error(weatherData.error || "Failed to get weather data.");
         }
 
-        // Step 2: Send those features to forecast prediction
         const forecastRes = await fetch("http://localhost:8000/api/predict/forecast", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -71,11 +69,28 @@ const EnergyForecast = ({ coordinates }) => {
             ✖
           </button>
           <h2 className="text-xl mb-4">📈 Energy Output Forecast (300 Days)</h2>
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={data}>
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart
+              data={data}
+              margin={{ top: 20, right: 30, left: 50, bottom: 40 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
+              <XAxis dataKey="day">
+                <Label
+                  value="Days"
+                  position="insideBottom"
+                  offset={-15}  // moves the label down
+                />
+              </XAxis>
+              <YAxis>
+                <Label
+                  value="Energy Output (kW)"
+                  angle={-90}
+                  position="insideLeft"
+                  offset={-20}  // moves the label left
+                  style={{ textAnchor: 'middle' }}
+                />
+              </YAxis>
               <Tooltip />
               <Line type="monotone" dataKey="energyOutput" stroke="#8884d8" />
             </LineChart>
