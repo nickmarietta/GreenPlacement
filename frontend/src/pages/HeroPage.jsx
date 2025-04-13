@@ -1,10 +1,10 @@
-import React from 'react';
-import NebulaBG from '../components/Nebula';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import earthImg from '../assets/planet-earth.png';
+import NebulaBackground from '../components/Nebula';
 import astronautImg from '../assets/astronaut.png';
-
+import rocketImg from '../assets/rocket.svg';
 const HeroPage = () => {
   const [zoom, setZoom] = useState(false);
   const navigate = useNavigate();
@@ -13,48 +13,73 @@ const HeroPage = () => {
     setZoom(true);
     setTimeout(() => {
       navigate('/map');
-    }, 2000);
+    }, 2500);
   };
 
-
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-gradient-to-t from-[#050819] to-[#2e1753]">
-      <NebulaBG />
+    <div className="relative w-full h-screen overflow-hidden bg-black">
+      <NebulaBackground />
 
-      <div
-        className="absolute bottom-10 left-10 flex items-center space-x-2"
-        style={{ zIndex: 30 }}
-      >
-        <img
-          src={astronautImg}
-          alt="Astronaut"
-          className="w-24 animate-rotate-astronaut"
+
+      <AnimatePresence>
+        {zoom && (
+          <motion.div
+            className="absolute inset-0 bg-black z-40"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5 }}
+          />
+        )}
+      </AnimatePresence>
+
+      <div className="flex items-center justify-center h-full z-30 relative">
+        <motion.img
+          src={earthImg}
+          className="w-[200px] h-[200px] cursor-pointer"
+          initial={{ scale: 1, rotateZ: 0 }}
+          animate={{
+            scale: zoom ? 20 : 1,
+            rotateZ: zoom ? 360 : 0,
+            opacity: zoom ? 0.8 : 1,
+          }}
+          transition={{ duration: 2.5, ease: "easeInOut" }}
+          whileHover={{ scale: 1.3, rotateZ: 20 }}
+          onClick={handleClick}
         />
-        <div className="chat chat-start">
-        <div className="chat-bubble chat-bubble-info">Please save the environment!</div>
-      </div>
       </div>
 
-      <img
-        src={earthImg}
-        alt="Earth"
-        onClick={handleClick}
-        className={`cursor-pointer transition-transform duration-2000 ease-in-out ${
-          zoom ? 'scale-[500] z-50' : 'scale-100'
-        }`}
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          transformOrigin: 'center center',
-          zIndex: 20,
-        }}
-      />
+      <motion.div
+        className="absolute top-[10%] text-center text-white z-50 w-full"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: zoom ? 0 : 1 }}
+        transition={{ duration: 1 }}
+      >
+        <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
+      >
+        <h1 className="text-7xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-purple-500">EcoNauts</h1>
+      </motion.div>
 
-      <div className="absolute top-[10%] text-center text-white z-10 w-full">
-        <h1 className="font-bold text-green-500 text-5xl">Green Placement</h1>
-      </div>
+      </motion.div>
+
+      { 
+      <motion.img
+        src={astronautImg}
+        className="absolute bottom-10 left-10 w-[100px] z-20"
+        animate={{ y: [0, -20, 0] }}
+        transition={{ repeat: Infinity, duration: 3 }}
+      /> 
+      }
+      {/*Going to add a wit rocket */}
+      <motion.img
+        src={rocketImg}
+        className="absolute bottom-10 right-10 w-[100px] z-20"
+        animate={{ y: [0, -20, 0] }}
+        transition={{ repeat: Infinity, duration: 3 }}
+      /> 
     </div>
   );
 };
