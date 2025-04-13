@@ -22,7 +22,6 @@ scalers = {}
 for system_type in ['wind', 'solar']:
     try:
         models[system_type] = joblib.load(paths[system_type]['model'])
-        scalers[system_type] = joblib.load(paths[system_type]['scaler'])
         print(f"✅ Loaded {system_type} model and scaler.")
     except Exception as e:
         print(f"❌ Failed to load {system_type} model or scaler: {e}")

@@ -1,12 +1,22 @@
 import React, { useEffect } from "react";
 // Contexts
 import { useMapData } from "../pages/MapPage";
+// Components
+import Loading from "./Loading";
 
 const InfoPanel = () => {
   const { coordinates, useCoordinates, energySource, setEnergySource } =
     useMapData();
 
-  useEffect(() => {
+  const handleAddEnergySource = (source) => {
+    if (source == "wind") {
+      setEnergySource("wind");
+    } else if (source == "solar") {
+      setEnergySource("solar");
+    }
+  };
+
+  const handleCalculateEnergyOutput = () => {
     const getCoordinateFeatures = async (coordinates) => {
       try {
         let res = await fetch("/api/get-features", {
@@ -27,18 +37,6 @@ const InfoPanel = () => {
       }
     };
     getCoordinateFeatures(coordinates);
-  }, [coordinates]);
-
-  const handleAddEnergySource = (source) => {
-    if (source == "wind") {
-      setEnergySource("wind");
-    } else if (source == "solar") {
-      setEnergySource("solar");
-    }
-  };
-
-  const handleCalculateEnergyOutput = () => {
-    setEnergySource("");
   };
 
   return (
@@ -51,22 +49,22 @@ const InfoPanel = () => {
           <button
             className={`bg-white p-2 rounded-full cursor-pointer ${
               energySource == "wind"
-                ? "outline-2 outline-offset-2 outline-gray-100"
+                ? "outline-2 outline-offset-2 outline-gray-200"
                 : ""
             }`}
             onClick={() => handleAddEnergySource("wind")}
           >
-            Add wind turbine
+            Wind turbine
           </button>
           <button
             className={`bg-white p-2 rounded-full cursor-pointer ${
               energySource == "solar"
-                ? "outline-2 outline-offset-2 outline-gray-100"
+                ? "outline-2 outline-offset-2 outline-gray-200"
                 : ""
             }`}
             onClick={() => handleAddEnergySource("solar")}
           >
-            Add solar panel
+            Solar panel
           </button>
         </div>
       </div>
@@ -78,13 +76,14 @@ const InfoPanel = () => {
             </p>
           ))}
       </div>
-      <div className="flex justify-center">
+      <div className="flex justify-center flex-col">
         <button
           className=" bg-green-300 p-2 rounded-full cursor-pointer"
           onClick={handleCalculateEnergyOutput}
         >
           Calculate Energy Output
         </button>
+        <Loading />
       </div>
     </div>
   );
