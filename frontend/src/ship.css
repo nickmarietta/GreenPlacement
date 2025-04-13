@@ -1,0 +1,14 @@
+@keyframes blueGlow {
+    0%, 100% {
+      text-shadow: 0 0 4px rgba(0, 140, 223, 0.4), 0 0 10px rgba(0, 140, 223, 0.3);
+    }
+    50% {
+      text-shadow: 0 0 6px rgba(0, 140, 223, 0.6), 0 0 14px rgba(0, 140, 223, 0.4);
+    }
+  }
+  
+  .blue-glow {
+    color: #008cdf;
+    animation: blueGlow 3s ease-in-out infinite;
+  }
+  
