@@ -1,0 +1,28 @@
+@keyframes cometFly {
+    0% {
+      left: -150px;   
+      top: 50%;
+    }
+    50% {
+      left: 50%;
+      top: 20%;
+    }
+    100% {
+      left: 110%;
+      top: 80%;
+    }
+  }
+  
+  
+  @keyframes rotateAstronaut {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-rotate-astronaut {
+    animation: rotateAstronaut 10s linear infinite; /* 10s duration for continuous rotation */
+  }

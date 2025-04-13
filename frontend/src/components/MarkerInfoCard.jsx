@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 // Contexts
 import { useMapData } from "../pages/MapPage";
 import EnergyForecast from "./ShowDetails";
@@ -13,12 +13,12 @@ const MarkerInfoCard = ({ id, marker }) => {
 
   useEffect(() => {
     if (marker.predictedOutput) {
-      setShow(true);
+      toggleShow(true);
     }
   }, [marker]);
 
   const handleToggleShow = () => {
-    setShow((prev) => !prev);
+    toggleShow((prev) => !prev);
   };
 
   // Delete entire marker from state array
@@ -57,7 +57,7 @@ const MarkerInfoCard = ({ id, marker }) => {
     <div className="bg-gray-100 rounded-lg p-2 flex flex-col gap-2">
       <div className="flex gap-2">
         <div className="w-full flex gap-1 items-center">
-          {editing ? (
+          {editting ? (
             <>
               <button
                 className="cursor-pointer text-xs"
