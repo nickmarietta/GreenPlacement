@@ -1,8 +1,15 @@
 import { useState } from "react";
 import "./App.css";
+// Components
+// Pages
+import MapPage from "./pages/MapPage";
 
 function App() {
-  return <h1>Test</h1>;
+  return (
+    <>
+      <MapPage />
+    </>
+  );
 }
 
 export default App;
