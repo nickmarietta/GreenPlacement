@@ -9,7 +9,7 @@ const InfoPanel = () => {
   useEffect(() => {
     const getCoordinateFeatures = async (coordinates) => {
       try {
-        let res = await fetch("/api/get-features", {
+        let res = await fetch("http://localhost:8000/api/get-features", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ lngLat: coordinates }),
@@ -38,56 +38,87 @@ const InfoPanel = () => {
   };
 
   const handleCalculateEnergyOutput = async () => {
-    //Check if coordinates exist
     if (!coordinates || coordinates.length < 2) {
       alert("Coordinates not selected. Please place a marker on the map.");
       return;
     }
   
     const [lng, lat] = coordinates;
-    console.log("📍 Sending coordinates to API:", { lngLat: [lng, lat] });
+    console.log("Sending coordinates to API:", { lngLat: [lng, lat] });
   
     try {
-      // Step 1: Get weather features from your FastAPI backend
-      const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
+      const weatherEndpoint =
+        energySource === "solar"
+          ? "http://localhost:8000/api/get-solar-features"
+          : "http://localhost:8000/api/get-weather-features";
+  
+      const predictionEndpoint =
+        energySource === "solar"
+          ? "http://localhost:8000/api/predict/solar"
+          : "http://localhost:8000/api/predict/wind";
+  
+      // 1. Fetch features based on energy source
+      const weatherRes = await fetch(weatherEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lngLat: [lng, lat] }),
       });
   
       const weatherData = await weatherRes.json();
-      console.log("🌦 Weather response:", weatherData);
+      console.log("Weather API Response:", weatherData);
   
       if (!weatherRes.ok || weatherData.error) {
         throw new Error(weatherData.error || "Failed to get weather data.");
       }
   
-      // Step 2: Send features to prediction endpoint
-      const predictionRes = await fetch("http://localhost:8000/api/predict/wind", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      // 2. Prepare body based on energy source
+      let predictionBody = {};
+      if (energySource === "solar") {
+        predictionBody = {
+          temperature_2_m_above_gnd: weatherData.temperature_2_m_above_gnd,
+          relative_humidity_2_m_above_gnd: weatherData.relative_humidity_2_m_above_gnd,
+          total_cloud_cover_sfc: weatherData.total_cloud_cover_sfc,
+          shortwave_radiation_backwards_sfc: weatherData.shortwave_radiation_backwards_sfc,
+          angle_of_incidence: weatherData.angle_of_incidence,
+          zenith: weatherData.zenith,
+          azimuth: weatherData.azimuth,
+        };
+      } else {
+        predictionBody = {
           Wspd: weatherData.Wspd,
           Wdir: weatherData.Wdir,
           Etmp: weatherData.Etmp,
-        }),
+        };
+      }
+  
+      // 3. Get prediction
+      const predictionRes = await fetch(predictionEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(predictionBody),
       });
   
       const prediction = await predictionRes.json();
-      console.log("⚡ Prediction response:", prediction);
+      console.log("Prediction response:", prediction);
   
-      if (prediction.predicted_power_output !== undefined) {
-        alert(`🔋 Predicted Power Output: ${prediction.predicted_power_output.toFixed(2)} kW`);
+      const output =
+        energySource === "solar"
+          ? prediction.predicted_solar_power_kw
+          : prediction.predicted_power_output;
+  
+      if (output !== undefined) {
+        alert(`Predicted Power Output: ${output.toFixed(2)} kW`);
       } else {
         alert("Prediction failed.");
       }
     } catch (err) {
-      console.error("❌ Error during prediction flow:", err);
+      console.error("Error during prediction flow:", err);
       alert("An error occurred. Check the console for details.");
     }
   
     setEnergySource("");
   };
+  
 
   return (
     <div className="w-1/2 bg-gray-300 p-2 flex flex-col gap-2">
