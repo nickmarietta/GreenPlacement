@@ -9,7 +9,7 @@ from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
 import joblib
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('spg.csv')
+df = pd.read_csv(r'C:\GreenPlacement\backend\app\ml\spg.csv')
 
 #Feature Engineering
 df['temp_rad'] = df['temperature_2_m_above_gnd'] * df['shortwave_radiation_backwards_sfc']

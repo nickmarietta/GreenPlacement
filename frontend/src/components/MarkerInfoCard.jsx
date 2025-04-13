@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { motion } from "motion/react";
 import { useMapData } from "../pages/MapPage";
 import EnergyForecast from "./ShowDetails";
 
@@ -20,6 +21,7 @@ const MarkerInfoCard = ({ id, marker }) => {
   };
 
   const handleDeleteMarker = () => {
+    marker.marker.remove();
     setMarkers(markers.filter((m) => m !== marker));
   };
 
@@ -91,7 +93,7 @@ const MarkerInfoCard = ({ id, marker }) => {
   
 
   return (
-    <div className="bg-gray-100 rounded-lg p-2 flex flex-col gap-2">
+    <motion.div exit={{opacity: 0, y: 10}} initial={{opacity: 0, y: -10}} animate={{opacity: 1, y: 0}} className="bg-gray-100 rounded-lg p-2 flex flex-col gap-2">
       <div className="flex gap-2">
         <div className="w-full flex gap-1 items-center">
           {editting ? (
@@ -117,7 +119,7 @@ const MarkerInfoCard = ({ id, marker }) => {
             </>
           )}
           <button
-            className="text-xs"
+            className="text-xs cursor-pointer"
             onClick={() =>
               editting ? handleDiscardMarkerEdit() : handleDeleteMarker()
             }
@@ -127,7 +129,7 @@ const MarkerInfoCard = ({ id, marker }) => {
         </div>
 
         {!show && (
-          <div className="w-full text-center">
+          <motion.div className="w-full text-center">
             <p className="text-gray-500 text-sm">Coordinates</p>
             <div className="flex justify-center gap-1">
               {marker.lngLat &&
@@ -139,7 +141,7 @@ const MarkerInfoCard = ({ id, marker }) => {
                   </p>
                 ))}
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
 
@@ -199,7 +201,7 @@ const MarkerInfoCard = ({ id, marker }) => {
           {show ? "^" : marker.predictedOutput ? "v" : null}
         </button>
       )}
-    </div>
+    </motion.div>
   );
 };
 

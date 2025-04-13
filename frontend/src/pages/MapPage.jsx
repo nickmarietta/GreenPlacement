@@ -9,8 +9,8 @@ export const useMapData = () => {
 };
 
 const MapPage = () => {
-  const [coordinates, setCoordinates] = useState([0, 0]);
-  const [energySource, setEnergySource] = useState("");
+  const [coordinates, setCoordinates] = useState([-117.8851, 33.8823]);
+  const [energySource, setEnergySource] = useState(1);
   const [markers, setMarkers] = useState([]);
 
   return (

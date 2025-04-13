@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import { AnimatePresence } from "motion/react";
 import { useMapData } from "../pages/MapPage";
 import EnergyForecast from "./ShowDetails";
 import Loading from "./Loading";
@@ -16,8 +17,8 @@ const InfoPanel = () => {
   } = useMapData();
   const [loading, isLoading] = useState(false);
 
-  const handleAddEnergySource = (source) => {
-    setEnergySource(source);
+  const handleAddEnergySource = () => {
+    setEnergySource((prev) => prev += 1);
   };
 
   const handleCalculateEnergyOutput = async () => {
@@ -189,9 +190,11 @@ const InfoPanel = () => {
         </button>
         <div className="flex justify-center">{loading && <Loading />}</div>
       </div>
-      {markers.map((marker, index) => (
-        <MarkerInfoCard key={`marker-${index}`} id={index} marker={marker} />
-      ))}
+      <AnimatePresence>
+        {markers.map((marker, index) => (
+          <MarkerInfoCard key={`marker-${index}`} id={index} marker={marker} />
+        ))}
+      </AnimatePresence>
     </div>
   );
 };
