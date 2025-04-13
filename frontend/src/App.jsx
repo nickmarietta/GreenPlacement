@@ -1,12 +1,13 @@
 import { useState } from "react";
 import "./App.css";
-import MapBox from "./components/MapBox";
+// Components
+// Pages
+import MapPage from "./pages/MapPage";
 
 function App() {
   return (
     <>
-      <h1>Map</h1>
-      <MapBox />
+      <MapPage />
     </>
   );
 }

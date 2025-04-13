@@ -1,20 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
+// Mapbox
 import mapboxgl from "mapbox-gl";
-
 import "mapbox-gl/dist/mapbox-gl.css";
+// Contexts
+import { useMapData } from "../pages/MapPage";
 
 const MapBox = () => {
   const mapRef = useRef();
   const mapContainerRef = useRef();
 
-  const [coordinates, setCoordinates] = useState();
+  const { coordinates, setCoordinates } = useMapData();
 
   useEffect(() => {
-    mapboxgl.accessToken =
-      "pk.eyJ1Ijoiam9obnZvIiwiYSI6ImNtOWV1eXhxaDE4OGYycnEwYnExMDVqamoifQ.Z47vTvOeYLmxkaz1PrlYGw";
+    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_API;
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      zoom: 5,
+      center: [0, 0],
+      zoom: 0,
     });
 
     const marker = new mapboxgl.Marker({
@@ -41,9 +43,6 @@ const MapBox = () => {
         ref={mapContainerRef}
         className="w-screen h-screen"
       />
-      <div className="w-full">
-        {coordinates && coordinates.map((coord) => <p>{coord}</p>)}
-      </div>
     </>
   );
 };
