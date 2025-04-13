@@ -1,6 +1,7 @@
 # main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
 from app.ml.predictor import router as wind_predictor_router
 
 
