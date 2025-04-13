@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 // Contexts
 import { useMapData } from "../pages/MapPage";
-import EnergyForecast from "./EnergyForecast";
+import EnergyForecast from "./ShowDetails";
 import Loading from "./Loading";
 import MarkerInfoCard from "./MarkerInfoCard";
 
