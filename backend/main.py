@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
-from app.ml.predictor import router as wind_predictor_router
+from app.routers.predictors import router as wind_predictor_router
 from app.routers.weather import router as weather_router
 
 from dotenv import load_dotenv
@@ -33,6 +33,11 @@ app.add_middleware(
 app.include_router(wind_predictor_router, prefix="/api")
 
 app.include_router(weather_router, prefix="/api")
+
+@app.post("/api/predict/forecast")
+def forecast_energy_output(features: dict):
+    # Simulate 10 future intervals
+    return [{"day": i * 30, "energyOutput": predict_output(features)} for i in range(1, 11)]
 
 
 @app.get("/")

@@ -27,8 +27,8 @@ for system_type in ['wind', 'solar']:
             scalers[system_type] = joblib.load(paths[system_type]['scaler'])
         else:
             scalers[system_type] = None
-        print(f"✅ Loaded {system_type} model and (optional) scaler.")
+        print(f"Loaded {system_type} model and (optional) scaler.")
     except Exception as e:
-        print(f"❌ Failed to load {system_type} model or scaler: {e}")
+        print(f"Failed to load {system_type} model or scaler: {e}")
         models[system_type] = None
         scalers[system_type] = None

@@ -1,8 +1,13 @@
-from fastapi import APIRouter, Request
+import datetime
+from fastapi import APIRouter, Request, requests
 import httpx
 import os
+from ..ml.model_loader import models
+
+import numpy as np
 
 router = APIRouter()
+
 
 @router.post("/get-weather-features")
 async def get_weather_features(request: Request):
@@ -36,3 +41,43 @@ async def get_weather_features(request: Request):
 
     except Exception as e:
         return {"error": f"Exception occurred: {str(e)}"}
+    
+@router.post("/predict/forecast")
+async def forecast_energy_output(request: Request):
+    data = await request.json()
+    lng, lat = data.get("lngLat")
+    forecast = []
+    api_key = os.getenv("WEATHER_API_KEY")
+    if not api_key:
+        return {"error": "Missing WeatherAPI key. Set WEATHER_API_KEY in .env"}
+    
+    for days_ahead in range(30, 301, 30):  # Days 30, 60, ..., 300
+        forecast_date = (datetime.utcnow() + datetime.timedelta(days=days_ahead)).strftime("%Y-%m-%d")
+        url = f"http://api.weatherapi.com/v1/future.json?key={api_key}&q={lat},{lng}&dt={forecast_date}"
+
+        try:
+            res = requests.get(url)
+            res.raise_for_status()
+            weather = res.json()
+
+            day_data = weather["forecast"]["forecastday"][0]["day"]
+            Wspd = day_data["maxwind_kph"]
+            Wdir = 180  # Use default or average — the API doesn't provide daily avg wind dir
+            Etmp = day_data["avgtemp_c"]
+
+            model = models["wind"]
+            if model:
+                features = np.array([[Wspd, Wdir, Etmp]])
+                prediction = model.predict(features)[0]
+                forecast.append({
+                    "day": f"Day {days_ahead}",
+                    "energyOutput": round(prediction, 2)
+                })
+        except Exception as e:
+            forecast.append({
+                "day": f"Day {days_ahead}",
+                "energyOutput": None,
+                "error": str(e)
+            })
+
+    return forecast

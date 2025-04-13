@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 // Contexts
 import { useMapData } from "../pages/MapPage";
+import EnergyForecast from "./EnergyForecast";
 
 const InfoPanel = () => {
   const { coordinates, useCoordinates, energySource, setEnergySource } =
@@ -45,7 +46,7 @@ const InfoPanel = () => {
     }
   
     const [lng, lat] = coordinates;
-    console.log("📍 Sending coordinates to API:", { lngLat: [lng, lat] });
+    console.log("Sending coordinates to API:", { lngLat: [lng, lat] });
   
     try {
       // Step 1: Get weather features from your FastAPI backend
@@ -134,6 +135,7 @@ const InfoPanel = () => {
           Calculate Energy Output
         </button>
       </div>
+      <EnergyForecast coordinates={coordinates} />
     </div>
   );
 };
