@@ -81,16 +81,11 @@ def predict_solar(data: SolarInput):
         clear_sky_score
     ]])
 
-    # Prevent prediction if sun is below the horizon
-    if data.zenith > 90:
-        return {"predicted_solar_power_kw": 0.0}
-
+    # Always predict regardless of zenith (assumes 12:00 data)
     scaled = scaler_X.transform(features)
     prediction_scaled = model.predict(scaled)
     prediction = scaler_y.inverse_transform(prediction_scaled)[0][0]
 
-    # Clip to non-negative
+    # Clip to non-negative and scale to 24h
     prediction = max(0.0, prediction)
-
-    # Multiply by 8 for 24h estimate
     return {"predicted_solar_power_kw": float(round(prediction, 2) * 8)}
