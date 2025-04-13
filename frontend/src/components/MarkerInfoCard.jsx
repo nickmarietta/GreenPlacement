@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-// Contexts
 import { useMapData } from "../pages/MapPage";
 import EnergyForecast from "./ShowDetails";
 
@@ -9,7 +8,6 @@ const MarkerInfoCard = ({ id, marker }) => {
   const [tempName, setTempName] = useState("New Marker");
   const [editting, isEditting] = useState(false);
   const [show, toggleShow] = useState(false);
-  console.log("marker = ", marker);
 
   useEffect(() => {
     if (marker.predictedOutput) {
@@ -21,37 +19,76 @@ const MarkerInfoCard = ({ id, marker }) => {
     toggleShow((prev) => !prev);
   };
 
-  // Delete entire marker from state array
   const handleDeleteMarker = () => {
     setMarkers(markers.filter((m) => m !== marker));
   };
 
-  // Start editting marker name
   const handleEditting = () => {
     setTempName(marker.markerName || "New Marker");
     isEditting(true);
   };
+
   useEffect(() => {
     if (editting && inputRef.current) {
       inputRef.current.focus();
     }
   }, [editting]);
 
-  // Accept name change
   const handleChangeMarkerName = () => {
     setMarkers(
       markers.map((m) => (m === marker ? { ...m, markerName: tempName } : m))
     );
     isEditting(false);
-
   };
 
-  // Delete name changes
   const handleDiscardMarkerEdit = () => {
-
     setTempName(marker.markerName);
     isEditting(false);
   };
+
+  const averageScore = (score) =>
+    Object.values(score).reduce((a, b) => a + b, 0) / Object.keys(score).length;
+
+  const bestSource = (() => {
+    if (
+      marker.predictedSolarSustainabilityScore &&
+      marker.predictedWindSustainabilityScore &&
+      marker.predictedSolarOutput !== undefined &&
+      marker.predictedOutput !== undefined
+    ) {
+      const averageScore = (score) =>
+        Object.values(score).reduce((a, b) => a + b, 0) / Object.keys(score).length;
+  
+      const solarAvg = averageScore(marker.predictedSolarSustainabilityScore);
+      const windAvg = averageScore(marker.predictedWindSustainabilityScore);
+  
+      let weightedSolar = solarAvg;
+      let weightedWind = windAvg;
+  
+      // Boost for high output
+      if (marker.predictedSolarOutput > 10000) weightedSolar += 0.5;
+      if (marker.predictedOutput > 10000) weightedWind += 0.5;
+  
+      // Gradual penalties for being significantly less
+      if (marker.predictedSolarOutput < marker.predictedOutput * 0.5) {
+        weightedSolar -= 0.5;
+      } else if (marker.predictedSolarOutput < marker.predictedOutput) {
+        weightedSolar -= 0.25;
+      }
+  
+      if (marker.predictedOutput < marker.predictedSolarOutput * 0.5) {
+        weightedWind -= 0.5;
+      } else if (marker.predictedOutput < marker.predictedSolarOutput) {
+        weightedWind -= 0.25;
+      }
+  
+      return weightedSolar > weightedWind
+        ? { source: "Solar ☀️", score: weightedSolar }
+        : { source: "Wind 💨", score: weightedWind };
+    }
+    return null;
+  })();
+  
 
   return (
     <div className="bg-gray-100 rounded-lg p-2 flex flex-col gap-2">
@@ -59,10 +96,7 @@ const MarkerInfoCard = ({ id, marker }) => {
         <div className="w-full flex gap-1 items-center">
           {editting ? (
             <>
-              <button
-                className="cursor-pointer text-xs"
-                onClick={handleChangeMarkerName}
-              >
+              <button className="cursor-pointer text-xs" onClick={handleChangeMarkerName}>
                 ✅
               </button>
               <input
@@ -70,16 +104,11 @@ const MarkerInfoCard = ({ id, marker }) => {
                 className="rounded-lg p-2 bg-blue-200 w-full"
                 onChange={(e) => setTempName(e.target.value)}
                 value={tempName}
-
               />
             </>
           ) : (
             <>
-              <button
-
-                className="cursor-pointer text-xs"
-                onClick={handleEditting}
-              >
+              <button className="cursor-pointer text-xs" onClick={handleEditting}>
                 ✏️
               </button>
               <h2 className="rounded-full w-full p-2 bg-blue-200">
@@ -91,7 +120,6 @@ const MarkerInfoCard = ({ id, marker }) => {
             className="text-xs"
             onClick={() =>
               editting ? handleDiscardMarkerEdit() : handleDeleteMarker()
-
             }
           >
             ❌
@@ -139,7 +167,25 @@ const MarkerInfoCard = ({ id, marker }) => {
                   <p>☀️ Solar: {marker.predictedSolarOutput.toFixed(0)} kW</p>
                 )}
               </div>
-              <EnergyForecast coordinates={marker.lngLat} />
+
+              {bestSource && (
+                <>
+                  <div className="border-t border-gray-500 mt-2"></div>
+                  <p className="text-gray-500 text-sm">🌍 Sustainability Score</p>
+                  <p>
+                    🏆 Most Sustainable Source: {bestSource.source} (
+                    {bestSource.score.toFixed(1)} / 10)
+                  </p>
+                </>
+              )}
+
+              <EnergyForecast
+                coordinates={marker.lngLat}
+                predictedSolarOutput={marker.predictedSolarOutput}
+                predictedWindOutput={marker.predictedOutput}
+                predictedSolarSustainabilityScore={marker.predictedSolarSustainabilityScore}
+                predictedWindSustainabilityScore={marker.predictedWindSustainabilityScore}
+              />
             </>
           )}
         </>
