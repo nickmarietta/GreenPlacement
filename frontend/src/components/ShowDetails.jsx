@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label, Legend
 } from "recharts";
 
 const EnergyForecast = ({ coordinates }) => {
@@ -8,12 +8,12 @@ const EnergyForecast = ({ coordinates }) => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    const fetchForecast = async () => {
+    const fetchForecasts = async () => {
       if (!coordinates || coordinates.length !== 2) return;
-
       const [lng, lat] = coordinates;
 
       try {
+        // Step 1: Get wind features
         const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -22,11 +22,8 @@ const EnergyForecast = ({ coordinates }) => {
 
         const weatherData = await weatherRes.json();
 
-        if (!weatherRes.ok || weatherData.error) {
-          throw new Error(weatherData.error || "Failed to get weather data.");
-        }
-
-        const forecastRes = await fetch("http://localhost:8000/api/predict/forecast", {
+        // Step 2: Predict wind forecast
+        const windForecastRes = await fetch("http://localhost:8000/api/predict/forecast", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -36,16 +33,33 @@ const EnergyForecast = ({ coordinates }) => {
           }),
         });
 
-        const forecast = await forecastRes.json();
-        setData(forecast);
-        console.log("📈 Updated forecast:", forecast);
+        const windData = await windForecastRes.json();
+
+        // Step 3: Get solar forecast prediction
+        const solarForecastRes = await fetch("http://localhost:8000/api/predict/solar_forecast", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lngLat: [lng, lat] }),
+        });
+
+        const solarData = await solarForecastRes.json();
+
+        // Step 4: Merge wind and solar forecast into unified chart data
+        const merged = windData.map((wind, i) => ({
+          day: wind.day,
+          wind: wind.energyOutput,
+          solar: solarData[i]?.energyOutput ?? null,
+        }));
+
+        setData(merged);
+        console.log("Combined forecast:", merged);
       } catch (error) {
-        console.error("❌ Forecast error:", error);
+        console.error("Forecast error:", error);
       }
     };
 
     if (showForecast) {
-      fetchForecast();
+      fetchForecasts();
     }
   }, [coordinates, showForecast]);
 
@@ -76,23 +90,21 @@ const EnergyForecast = ({ coordinates }) => {
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="day">
-                <Label
-                  value="Days"
-                  position="insideBottom"
-                  offset={-15}  // moves the label down
-                />
+                <Label value="Days" position="insideBottom" offset={-15} />
               </XAxis>
               <YAxis>
                 <Label
                   value="Energy Output (kW)"
                   angle={-90}
                   position="insideLeft"
-                  offset={-20}  // moves the label left
+                  offset={-20}
                   style={{ textAnchor: 'middle' }}
                 />
               </YAxis>
               <Tooltip />
-              <Line type="monotone" dataKey="energyOutput" stroke="#8884d8" />
+              <Legend />
+              <Line type="monotone" dataKey="wind" stroke="#1f77b4" name="Wind Output" />
+              <Line type="monotone" dataKey="solar" stroke="#ff7f0e" name="Solar Output" />
             </LineChart>
           </ResponsiveContainer>
         </div>
