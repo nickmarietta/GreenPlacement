@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { motion } from "motion/react";
 import { useMapData } from "../pages/MapPage";
 import EnergyForecast from "./ShowDetails";
 
@@ -92,7 +93,7 @@ const MarkerInfoCard = ({ id, marker }) => {
   
 
   return (
-    <div className="bg-gray-100 rounded-lg p-2 flex flex-col gap-2">
+    <motion.div exit={{opacity: 0, y: 10}} initial={{opacity: 0, y: -10}} animate={{opacity: 1, y: 0}} className="bg-gray-100 rounded-lg p-2 flex flex-col gap-2">
       <div className="flex gap-2">
         <div className="w-full flex gap-1 items-center">
           {editting ? (
@@ -200,7 +201,7 @@ const MarkerInfoCard = ({ id, marker }) => {
           {show ? "^" : marker.predictedOutput ? "v" : null}
         </button>
       )}
-    </div>
+    </motion.div>
   );
 };
 
