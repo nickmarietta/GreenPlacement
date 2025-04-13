@@ -11,6 +11,17 @@ import {
   Legend,
   BarChart,
   Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Label,
+  Legend,
+  BarChart,
+  Bar,
 } from "recharts";
 import Loading from "./Loading";
 
@@ -19,6 +30,7 @@ const EnergyForecast = ({
   predictedSolarOutput,
   predictedWindOutput,
   predictedSolarSustainabilityScore,
+  predictedWindSustainabilityScore,
   predictedWindSustainabilityScore,
 }) => {
   const [showForecast, setShowForecast] = useState(false);
@@ -137,6 +149,10 @@ const EnergyForecast = ({
       }
     };
 
+    if (showForecast) {
+      fetchForecasts();
+    }
+
     if (showForecast) fetchForecasts();
   }, [showForecast]);
 
@@ -145,6 +161,7 @@ const EnergyForecast = ({
     landUse: "Land Use",
     waterUse: "Water Use",
     cost: "Cost per kWh",
+    scalability: "Scalability",
     scalability: "Scalability",
   };
 

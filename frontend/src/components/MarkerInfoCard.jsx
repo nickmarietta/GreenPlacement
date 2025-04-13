@@ -58,10 +58,6 @@ const MarkerInfoCard = ({ id, marker }) => {
       marker.predictedSolarOutput !== undefined &&
       marker.predictedOutput !== undefined
     ) {
-      const averageScore = (score) =>
-        Object.values(score).reduce((a, b) => a + b, 0) /
-        Object.keys(score).length;
-
       const solarAvg = averageScore(marker.predictedSolarSustainabilityScore);
       const windAvg = averageScore(marker.predictedWindSustainabilityScore);
 
