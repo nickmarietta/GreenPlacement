@@ -1,7 +1,13 @@
 fastapi
 uvicorn
-python-dotenv
-scikit-learn
-pandas
-joblib
 httpx
+scikit-learn
+numpy
+pandas
+tensorflow
+pvlib
+requests
+requests_cache
+retry_requests
+python-dotenv
+openmeteo_requests
