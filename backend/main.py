@@ -4,8 +4,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
 import httpx
-from app.routers.predictors import router as wind_predictor_router
+from app.routers.predictors import router as predictors_router
 from app.routers.weather import router as weather_router
+from app.routers.solarweather import router as solar_router
 
 from dotenv import load_dotenv
 
@@ -30,39 +31,15 @@ app.add_middleware(
 )
 
 # Routers
-from app.ml.predictor import router as predictor_router
 from app.routers.weather import router as weather_router
 from app.routers.solarweather import router as solar_router
 
-app.include_router(predictor_router, prefix="/api")
+app.include_router(predictors_router, prefix="/api")
 app.include_router(weather_router, prefix="/api")
 app.include_router(solar_router, prefix="/api")
 
 from app.ml.model_loader import models
 import numpy as np
-
-@app.post("/api/predict/forecast")
-def forecast_energy_output(features: dict):
-    model = models["wind"]
-    forecast = []
-
-    for i in range(1, 11):
-        # Simulate changing weather features over time
-        # In a real case, you'd pull weather API data here
-        simulated_wspd = features.get("Wspd", 8) + i * 0.1
-        simulated_wdir = features.get("Wdir", 180)
-        simulated_etmp = features.get("Etmp", 15) + i * 0.2
-
-        X = np.array([[simulated_wspd, simulated_wdir, simulated_etmp]])
-
-        prediction = model.predict(X)[0] if model else None
-
-        forecast.append({
-            "day": f"Day {i * 30}",
-            "energyOutput": round(prediction, 2) if prediction else None
-        })
-
-    return forecast
 
 
 # Routes

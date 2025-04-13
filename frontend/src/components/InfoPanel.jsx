@@ -160,9 +160,6 @@ const InfoPanel = () => {
       {markers.map((marker, index) => (
         <MarkerInfoCard key={`marker-${index}`} id={index} marker={marker} />
       ))}
-
-      {/* Forecast chart popout toggle */}
-      <EnergyForecast coordinates={coordinates} />
     </div>
   );
 };
