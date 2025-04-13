@@ -59,61 +59,72 @@ const MarkerInfoCard = ({ id, marker }) => {
       marker.predictedOutput !== undefined
     ) {
       const averageScore = (score) =>
-        Object.values(score).reduce((a, b) => a + b, 0) / Object.keys(score).length;
-  
+        Object.values(score).reduce((a, b) => a + b, 0) /
+        Object.keys(score).length;
+
       const solarAvg = averageScore(marker.predictedSolarSustainabilityScore);
       const windAvg = averageScore(marker.predictedWindSustainabilityScore);
-  
+
       let weightedSolar = solarAvg;
       let weightedWind = windAvg;
-  
+
       // Boost for high output
       if (marker.predictedSolarOutput > 10000) weightedSolar += 0.5;
       if (marker.predictedOutput > 10000) weightedWind += 0.5;
-  
+
       // Gradual penalties for being significantly less
       if (marker.predictedSolarOutput < marker.predictedOutput * 0.5) {
         weightedSolar -= 0.5;
       } else if (marker.predictedSolarOutput < marker.predictedOutput) {
         weightedSolar -= 0.25;
       }
-  
+
       if (marker.predictedOutput < marker.predictedSolarOutput * 0.5) {
         weightedWind -= 0.5;
       } else if (marker.predictedOutput < marker.predictedSolarOutput) {
         weightedWind -= 0.25;
       }
-  
+
       return weightedSolar > weightedWind
         ? { source: "Solar ☀️", score: weightedSolar }
         : { source: "Wind 💨", score: weightedWind };
     }
     return null;
   })();
-  
 
   return (
-    <motion.div exit={{opacity: 0, y: 10}} initial={{opacity: 0, y: -10}} animate={{opacity: 1, y: 0}} className="bg-gray-100 rounded-lg p-2 flex flex-col gap-2">
+    <motion.div
+      exit={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-gray-800 rounded-lg p-2 flex flex-col gap-2"
+    >
       <div className="flex gap-2">
         <div className="w-full flex gap-1 items-center">
           {editting ? (
             <>
-              <button className="cursor-pointer text-xs" onClick={handleChangeMarkerName}>
+              <button
+                className="cursor-pointer text-xs"
+                onClick={handleChangeMarkerName}
+              >
                 ✅
               </button>
               <input
                 ref={inputRef}
-                className="rounded-lg p-2 bg-blue-200 w-full"
+                className="rounded-lg p-2 bg-gradient-to-r from-violet-600 to-indigo-600 w-full"
                 onChange={(e) => setTempName(e.target.value)}
                 value={tempName}
               />
             </>
           ) : (
             <>
-              <button className="cursor-pointer text-xs" onClick={handleEditting}>
+              <button
+                className="cursor-pointer text-xs"
+                onClick={handleEditting}
+              >
                 ✏️
               </button>
-              <h2 className="rounded-full w-full p-2 bg-blue-200">
+              <h2 className="rounded-full w-full p-2 bg-gradient-to-r from-violet-600 to-indigo-600">
                 {marker.markerName || "New Marker"}
               </h2>
             </>
@@ -173,7 +184,9 @@ const MarkerInfoCard = ({ id, marker }) => {
               {bestSource && (
                 <>
                   <div className="border-t border-gray-500 mt-2"></div>
-                  <p className="text-gray-500 text-sm">🌍 Sustainability Score</p>
+                  <p className="text-gray-500 text-sm">
+                    🌍 Sustainability Score
+                  </p>
                   <p>
                     🏆 Most Sustainable Source: {bestSource.source} (
                     {bestSource.score.toFixed(1)} / 10)
@@ -185,8 +198,12 @@ const MarkerInfoCard = ({ id, marker }) => {
                 coordinates={marker.lngLat}
                 predictedSolarOutput={marker.predictedSolarOutput}
                 predictedWindOutput={marker.predictedOutput}
-                predictedSolarSustainabilityScore={marker.predictedSolarSustainabilityScore}
-                predictedWindSustainabilityScore={marker.predictedWindSustainabilityScore}
+                predictedSolarSustainabilityScore={
+                  marker.predictedSolarSustainabilityScore
+                }
+                predictedWindSustainabilityScore={
+                  marker.predictedWindSustainabilityScore
+                }
               />
             </>
           )}
