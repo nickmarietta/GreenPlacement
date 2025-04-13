@@ -2,5 +2,6 @@ backend/app/ml/wind_turbine_model.pkl
 backend/app/ml/solarprediction_model.keras
 backend/app/ml/scaler_input.pkl
 backend/app/ml/scaler_output.pkl
-
+__pycache__/
+*.pyc
 
