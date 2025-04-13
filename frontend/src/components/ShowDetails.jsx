@@ -11,17 +11,6 @@ import {
   Legend,
   BarChart,
   Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Label,
-  Legend,
-  BarChart,
-  Bar,
 } from "recharts";
 import Loading from "./Loading";
 import homeIcon from '../assets/home.svg?url';
@@ -32,7 +21,6 @@ const EnergyForecast = ({
   predictedSolarOutput,
   predictedWindOutput,
   predictedSolarSustainabilityScore,
-  predictedWindSustainabilityScore,
   predictedWindSustainabilityScore,
 }) => {
   const [showForecast, setShowForecast] = useState(false);
