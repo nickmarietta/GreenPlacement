@@ -1,33 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 // Contexts
 import { useMapData } from "../pages/MapPage";
+// Components
+import Loading from "./Loading";
 
 const InfoPanel = () => {
   const { coordinates, useCoordinates, energySource, setEnergySource } =
     useMapData();
-
-  useEffect(() => {
-    const getCoordinateFeatures = async (coordinates) => {
-      try {
-        let res = await fetch("/api/get-features", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lngLat: coordinates }),
-        });
-        // let res = await fetch("/api");
-        if (!res.ok) {
-          throw new Error("Error fetching");
-        }
-        res = await res.json();
-        console.log(res);
-        return res;
-      } catch (error) {
-        console.error("Failed fetching features:", error);
-        throw error;
-      }
-    };
-    getCoordinateFeatures(coordinates);
-  }, [coordinates]);
+  const [predictedOutput, setPredictedOutput] = useState(null);
+  const [loading, isLoading] = useState(false);
 
   const handleAddEnergySource = (source) => {
     if (source == "wind") {
@@ -43,11 +24,12 @@ const InfoPanel = () => {
       alert("Coordinates not selected. Please place a marker on the map.");
       return;
     }
-  
+
     const [lng, lat] = coordinates;
     console.log("📍 Sending coordinates to API:", { lngLat: [lng, lat] });
-  
+
     try {
+      isLoading(true);
       // Step 1: Get weather features from your FastAPI backend
       const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
         method: "POST",
@@ -57,7 +39,7 @@ const InfoPanel = () => {
   
       const weatherData = await weatherRes.json();
       console.log("🌦 Weather response:", weatherData);
-  
+
       if (!weatherRes.ok || weatherData.error) {
         throw new Error(weatherData.error || "Failed to get weather data.");
       }
@@ -75,15 +57,17 @@ const InfoPanel = () => {
   
       const prediction = await predictionRes.json();
       console.log("⚡ Prediction response:", prediction);
-  
+
       if (prediction.predicted_power_output !== undefined) {
-        alert(`🔋 Predicted Power Output: ${prediction.predicted_power_output.toFixed(2)} kW`);
+        setPredictedOutput(prediction.predicted_power_output.toFixed(0));
       } else {
         alert("Prediction failed.");
       }
     } catch (err) {
       console.error("❌ Error during prediction flow:", err);
       alert("An error occurred. Check the console for details.");
+    } finally {
+      isLoading(false);
     }
   
     setEnergySource("");
@@ -99,41 +83,57 @@ const InfoPanel = () => {
           <button
             className={`bg-white p-2 rounded-full cursor-pointer ${
               energySource == "wind"
-                ? "outline-2 outline-offset-2 outline-gray-100"
+                ? "outline-2 outline-offset-2 outline-gray-200"
                 : ""
             }`}
             onClick={() => handleAddEnergySource("wind")}
           >
-            Add wind turbine
+            Wind turbine
           </button>
           <button
             className={`bg-white p-2 rounded-full cursor-pointer ${
               energySource == "solar"
-                ? "outline-2 outline-offset-2 outline-gray-100"
+                ? "outline-2 outline-offset-2 outline-gray-200"
                 : ""
             }`}
             onClick={() => handleAddEnergySource("solar")}
           >
-            Add solar panel
+            Solar panel
           </button>
         </div>
       </div>
       <div className="bg-gray-100 rounded-lg p-2">
+        <div>
+          <p className="text-gray-500 text-sm">Coordinates</p>
+        </div>
         {coordinates &&
           coordinates.map((coord, index) => (
             <p key={`coord-${index}`}>
-              {index == 0 ? `Latitude: ${coord}` : `Longitude: ${coord}`}
+              {index == 0
+                ? `Latitude: ${coord.toFixed(2)}°`
+                : `Longitude: ${coord.toFixed(2)}°`}
             </p>
           ))}
       </div>
-      <div className="flex justify-center">
+      <div className="flex justify-center flex-col gap-2">
         <button
           className=" bg-green-300 p-2 rounded-full cursor-pointer"
           onClick={handleCalculateEnergyOutput}
         >
           Calculate Energy Output
         </button>
+        <div className="flex justify-center">{loading && <Loading />}</div>
       </div>
+      {predictedOutput && (
+        <div className="bg-gray-100 rounded-lg p-2">
+          <div>
+            <p className="text-gray-500 text-sm">Results</p>
+          </div>
+          <div>
+            <p>⚡{predictedOutput} kW</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -8,7 +8,7 @@ import { useMapData } from "../pages/MapPage";
 const MapBox = () => {
   const mapRef = useRef();
   const mapContainerRef = useRef();
-  const markerRef = useRef([]);
+  const markerRef = useRef();
 
   const { coordinates, setCoordinates, energySource } = useMapData();
 
@@ -28,13 +28,15 @@ const MapBox = () => {
   useEffect(() => {
     if (!mapRef.current) return;
 
+    if (markerRef.current) {
+      markerRef.current.remove();
+    }
     const marker = new mapboxgl.Marker({
       draggable: true,
     })
-      .setLngLat([0, 0])
+      .setLngLat(coordinates)
       .addTo(mapRef.current);
-    markerRef.current.push(marker);
-    // Track the coordinates of the selected marker
+    markerRef.current = marker;
     const getCoordinates = () => {
       const lngLat = marker.getLngLat();
       setCoordinates([lngLat.lng, lngLat.lat]);

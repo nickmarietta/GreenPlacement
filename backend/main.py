@@ -1,9 +1,11 @@
 # main.py
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
 from app.ml.predictor import router as wind_predictor_router
 from app.routers.weather import router as weather_router
+import httpx
+import os
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -43,6 +45,13 @@ def root():
 @app.post("/get-features")
 async def get_features(request: Request):
     data = await request.json()
-    lng, lat = data.get("lngLat")
-    return {"lng": lng or None, "lat": lat or None}
+    lng, lat = data.get("lngLat") # Get coordinates from request body
+    # Call external API to get features
+    async with httpx.AsyncClient() as client:
+        res = await client.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&exclude=minutely,hourly,daily,alerts&appid={os.getenv("WEATHER_API")}")
+        weather_data = res.json()
+    
+    # Select features to return
+    
+    return {"weater_data": weather_data}
 
