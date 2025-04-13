@@ -38,7 +38,7 @@ const InfoPanel = () => {
   };
 
   const handleCalculateEnergyOutput = async () => {
-    // ✅ Check if coordinates exist
+    //Check if coordinates exist
     if (!coordinates || coordinates.length < 2) {
       alert("Coordinates not selected. Please place a marker on the map.");
       return;
@@ -48,7 +48,7 @@ const InfoPanel = () => {
     console.log("📍 Sending coordinates to API:", { lngLat: [lng, lat] });
   
     try {
-      // ✅ Step 1: Get weather features from your FastAPI backend
+      // Step 1: Get weather features from your FastAPI backend
       const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -62,7 +62,7 @@ const InfoPanel = () => {
         throw new Error(weatherData.error || "Failed to get weather data.");
       }
   
-      // ✅ Step 2: Send features to prediction endpoint
+      // Step 2: Send features to prediction endpoint
       const predictionRes = await fetch("http://localhost:8000/api/predict/wind", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -86,7 +86,7 @@ const InfoPanel = () => {
       alert("An error occurred. Check the console for details.");
     }
   
-    setEnergySource(""); // Optional: reset UI selection
+    setEnergySource("");
   };
 
   return (
