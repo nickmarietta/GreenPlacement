@@ -42,8 +42,11 @@ const InfoPanel = () => {
   };
 
   return (
-    <div className="w-1/2 bg-gray-300 p-2">
-      <div className="flex flex-col gap-2">
+    <div className="w-1/2 bg-gray-300 p-2 flex flex-col gap-2">
+      <div className="flex flex-col gap-2 bg-gray-100 rounded-lg p-2">
+        <div>
+          <p className="text-gray-500 text-sm">Tool box</p>
+        </div>
         <div className="flex gap-2 justify-center">
           <button
             className={`bg-white p-2 rounded-full cursor-pointer ${
@@ -66,22 +69,22 @@ const InfoPanel = () => {
             Add solar panel
           </button>
         </div>
-        <div className="flex justify-center">
-          <button
-            className=" bg-green-300 p-2 rounded-full cursor-pointer"
-            onClick={handleCalculateEnergyOutput}
-          >
-            Calculate Energy Output
-          </button>
-        </div>
       </div>
-      <div className="w-full">
+      <div className="bg-gray-100 rounded-lg p-2">
         {coordinates &&
           coordinates.map((coord, index) => (
             <p key={`coord-${index}`}>
               {index == 0 ? `Latitude: ${coord}` : `Longitude: ${coord}`}
             </p>
           ))}
+      </div>
+      <div className="flex justify-center">
+        <button
+          className=" bg-green-300 p-2 rounded-full cursor-pointer"
+          onClick={handleCalculateEnergyOutput}
+        >
+          Calculate Energy Output
+        </button>
       </div>
     </div>
   );
