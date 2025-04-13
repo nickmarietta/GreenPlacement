@@ -129,7 +129,7 @@ const MarkerInfoCard = ({ id, marker }) => {
         </div>
 
         {!show && (
-          <div className="w-full text-center">
+          <motion.div className="w-full text-center">
             <p className="text-gray-500 text-sm">Coordinates</p>
             <div className="flex justify-center gap-1">
               {marker.lngLat &&
@@ -141,7 +141,7 @@ const MarkerInfoCard = ({ id, marker }) => {
                   </p>
                 ))}
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
 
