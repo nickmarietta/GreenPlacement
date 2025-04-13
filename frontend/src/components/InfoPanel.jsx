@@ -37,8 +37,56 @@ const InfoPanel = () => {
     }
   };
 
-  const handleCalculateEnergyOutput = () => {
-    setEnergySource("");
+  const handleCalculateEnergyOutput = async () => {
+    // ✅ Check if coordinates exist
+    if (!coordinates || coordinates.length < 2) {
+      alert("Coordinates not selected. Please place a marker on the map.");
+      return;
+    }
+  
+    const [lng, lat] = coordinates;
+    console.log("📍 Sending coordinates to API:", { lngLat: [lng, lat] });
+  
+    try {
+      // ✅ Step 1: Get weather features from your FastAPI backend
+      const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lngLat: [lng, lat] }),
+      });
+  
+      const weatherData = await weatherRes.json();
+      console.log("🌦 Weather response:", weatherData);
+  
+      if (!weatherRes.ok || weatherData.error) {
+        throw new Error(weatherData.error || "Failed to get weather data.");
+      }
+  
+      // ✅ Step 2: Send features to prediction endpoint
+      const predictionRes = await fetch("http://localhost:8000/api/predict/wind", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Wspd: weatherData.Wspd,
+          Wdir: weatherData.Wdir,
+          Etmp: weatherData.Etmp,
+        }),
+      });
+  
+      const prediction = await predictionRes.json();
+      console.log("⚡ Prediction response:", prediction);
+  
+      if (prediction.predicted_power_output !== undefined) {
+        alert(`🔋 Predicted Power Output: ${prediction.predicted_power_output.toFixed(2)} kW`);
+      } else {
+        alert("Prediction failed.");
+      }
+    } catch (err) {
+      console.error("❌ Error during prediction flow:", err);
+      alert("An error occurred. Check the console for details.");
+    }
+  
+    setEnergySource(""); // Optional: reset UI selection
   };
 
   return (
