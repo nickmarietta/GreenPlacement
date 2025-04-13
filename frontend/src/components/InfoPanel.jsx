@@ -37,14 +37,14 @@ const InfoPanel = () => {
     }
   };
 
-  const handleResetEnergySource = () => {
+  const handleCalculateEnergyOutput = () => {
     setEnergySource("");
   };
 
   return (
     <div className="w-1/2 bg-gray-300 p-2">
       <div className="flex flex-col gap-2">
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center">
           <button
             className={`bg-white p-2 rounded-full cursor-pointer ${
               energySource == "wind"
@@ -63,15 +63,17 @@ const InfoPanel = () => {
             }`}
             onClick={() => handleAddEnergySource("solar")}
           >
-            Add wind turbine
+            Add solar panel
           </button>
         </div>
-        <button
-          className="w-fit bg-white p-2 rounded-full cursor-pointer"
-          onClick={handleResetEnergySource}
-        >
-          Reset
-        </button>
+        <div className="flex justify-center">
+          <button
+            className=" bg-green-300 p-2 rounded-full cursor-pointer"
+            onClick={handleCalculateEnergyOutput}
+          >
+            Calculate Energy Output
+          </button>
+        </div>
       </div>
       <div className="w-full">
         {coordinates &&
