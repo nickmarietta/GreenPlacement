@@ -27,20 +27,32 @@ const MapBox = () => {
 
   useEffect(() => {
     if (!mapRef.current) return;
-    // Enforce only one marker (for now)
-    // if (markersRef.current) {
-    //   markersRef.current = [];
-    // }
-    const newMarker = new mapboxgl.Marker({
-      draggable: true,
-    })
-      .setLngLat(coordinates)
+
+    const newMarker = new mapboxgl.Marker({ draggable: true })
+      .setLngLat([0, 0])
       .addTo(mapRef.current);
-    setMarkers([...markers, newMarker]);
+
+    setMarkers((prevMarkers) => [
+      ...prevMarkers,
+      {
+        marker: newMarker,
+        lngLat: [0, 0],
+      },
+    ]);
+
     const getCoordinates = () => {
       const lngLat = newMarker.getLngLat();
       setCoordinates([lngLat.lng, lngLat.lat]);
+
+      setMarkers((prev) =>
+        prev.map((m) =>
+          m.marker === newMarker
+            ? { ...m, lngLat: [lngLat.lng, lngLat.lat] }
+            : m
+        )
+      );
     };
+
     newMarker.on("dragend", getCoordinates);
   }, [energySource]);
 

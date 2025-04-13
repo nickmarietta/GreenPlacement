@@ -12,8 +12,8 @@ const InfoPanel = () => {
     energySource,
     setEnergySource,
     markers,
+    setMarkers,
   } = useMapData();
-  const [predictedOutput, setPredictedOutput] = useState(null);
   const [loading, isLoading] = useState(false);
 
   // Fetch features when coordinates change
@@ -42,90 +42,72 @@ const InfoPanel = () => {
   };
 
   const handleCalculateEnergyOutput = async () => {
-    if (!coordinates || coordinates.length < 2) {
-      alert("Coordinates not selected. Please place a marker on the map.");
-      return;
-    }
+    // Check if a marker exists
     if (markers.length < 1) {
       alert("No marker created. Please select an energy source.");
     }
 
-    const [lng, lat] = coordinates;
-    console.log("Sending coordinates to API:", { lngLat: [lng, lat] });
-  
-    try {
-      const weatherEndpoint =
-        energySource === "solar"
-          ? "http://localhost:8000/api/get-solar-features"
-          : "http://localhost:8000/api/get-weather-features";
-  
-      const predictionEndpoint =
-        energySource === "solar"
-          ? "http://localhost:8000/api/predict/solar"
-          : "http://localhost:8000/api/predict/wind";
-  
-      // 1. Fetch features based on energy source
-      const weatherRes = await fetch(weatherEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lngLat: [lng, lat] }),
-      });
+    markers.forEach((marker) => {
+      const getFeatures = async (marker) => {
+        try {
+          const [lng, lat] = marker.lngLat;
+          console.log("📍 Sending coordinates to API:", { lngLat: [lng, lat] });
+          isLoading(true);
+          // Step 1: Get weather features from your FastAPI backend
+          const weatherRes = await fetch(
+            "http://localhost:8000/api/get-weather-features",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ lngLat: [lng, lat] }),
+            }
+          );
 
+          const weatherData = await weatherRes.json();
+          console.log("🌦 Weather response:", weatherData);
 
-      const weatherData = await weatherRes.json();
-      console.log("Weather API Response:", weatherData);
-  
-      if (!weatherRes.ok || weatherData.error) {
-        throw new Error(weatherData.error || "Failed to get weather data.");
-      }
-  
-      // 2. Prepare body based on energy source
-      let predictionBody = {};
-      if (energySource === "solar") {
-        predictionBody = {
-          temperature_2_m_above_gnd: weatherData.temperature_2_m_above_gnd,
-          relative_humidity_2_m_above_gnd: weatherData.relative_humidity_2_m_above_gnd,
-          total_cloud_cover_sfc: weatherData.total_cloud_cover_sfc,
-          shortwave_radiation_backwards_sfc: weatherData.shortwave_radiation_backwards_sfc,
-          angle_of_incidence: weatherData.angle_of_incidence,
-          zenith: weatherData.zenith,
-          azimuth: weatherData.azimuth,
-        };
-      } else {
-        predictionBody = {
-          Wspd: weatherData.Wspd,
-          Wdir: weatherData.Wdir,
-          Etmp: weatherData.Etmp,
-        };
-      }
-  
-      // 3. Get prediction
-      const predictionRes = await fetch(predictionEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(predictionBody),
-      });
+          if (!weatherRes.ok || weatherData.error) {
+            throw new Error(weatherData.error || "Failed to get weather data.");
+          }
 
-      const prediction = await predictionRes.json();
-      console.log("Prediction response:", prediction);
-  
-      const output =
-        energySource === "solar"
-          ? prediction.predicted_solar_power_kw
-          : prediction.predicted_power_output;
-  
-      if (output !== undefined) {
-        alert(`Predicted Power Output: ${output.toFixed(2)} kW`);
-      } else {
-        alert("Prediction failed.");
-      }
-    } catch (err) {
-      console.error("Error during prediction flow:", err);
-      alert("An error occurred. Check the console for details.");
-    } finally {
-      isLoading(false);
-      setEnergySource("");
-    }
+          // Step 2: Send features to prediction endpoint
+          const predictionRes = await fetch(
+            "http://localhost:8000/api/predict/wind",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                Wspd: weatherData.Wspd,
+                Wdir: weatherData.Wdir,
+                Etmp: weatherData.Etmp,
+              }),
+            }
+          );
+
+          const prediction = await predictionRes.json();
+          console.log("⚡ Prediction response:", prediction);
+
+          if (prediction.predicted_power_output !== undefined) {
+            setMarkers((prev) =>
+              prev.map((m) =>
+                m === marker
+                  ? { ...m, predictedOutput: prediction.predicted_power_output }
+                  : m
+              )
+            );
+          } else {
+            alert("Prediction failed.");
+          }
+        } catch (err) {
+          console.error("❌ Error during prediction flow:", err);
+          alert("An error occurred. Check the console for details.");
+        } finally {
+          isLoading(false);
+        }
+      };
+
+      getFeatures(marker);
+    });
   };
   
 
@@ -175,14 +157,12 @@ const InfoPanel = () => {
         </button>
         <div className="flex justify-center">{loading && <Loading />}</div>
       </div>
-        {markers.map((_, index) => (
-          <MarkerInfoCard
-            key={`marker-${index}`}
-            predictedOutput={predictedOutput}
-            id={index}
-            coordinates={coordinates}
-          />
-        ))}
+      {markers.map((marker, index) => (
+        <MarkerInfoCard key={`marker-${index}`} id={index} marker={marker} />
+      ))}
+
+      {/* Forecast chart popout toggle */}
+      <EnergyForecast coordinates={coordinates} />
     </div>
   );
 };
