@@ -1,7 +1,27 @@
 import React, { useEffect, useState } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Label, Legend, BarChart, Bar
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Label,
+  Legend,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Label,
+  Legend,
+  BarChart,
+  Bar,
 } from "recharts";
 import Loading from "./Loading";
 import homeIcon from '../assets/home.svg?url';
@@ -12,7 +32,8 @@ const EnergyForecast = ({
   predictedSolarOutput,
   predictedWindOutput,
   predictedSolarSustainabilityScore,
-  predictedWindSustainabilityScore
+  predictedWindSustainabilityScore,
+  predictedWindSustainabilityScore,
 }) => {
   const [showForecast, setShowForecast] = useState(false);
   const [data, setData] = useState([]);
@@ -92,37 +113,47 @@ const EnergyForecast = ({
   };
 
   useEffect(() => {
+    if (!showForecast) return;
     const fetchForecasts = async () => {
       if (!coordinates || coordinates.length !== 2) return;
       const [lng, lat] = coordinates;
 
       setLoading(true);
       try {
-        const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lngLat: [lng, lat] }),
-        });
+        const weatherRes = await fetch(
+          "http://localhost:8000/api/get-weather-features",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lngLat: [lng, lat] }),
+          }
+        );
 
         const weatherData = await weatherRes.json();
 
-        const windForecastRes = await fetch("http://localhost:8000/api/predict/forecast", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            Wspd: weatherData.Wspd,
-            Wdir: weatherData.Wdir,
-            Etmp: weatherData.Etmp,
-          }),
-        });
+        const windForecastRes = await fetch(
+          "http://localhost:8000/api/predict/forecast",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              Wspd: weatherData.Wspd,
+              Wdir: weatherData.Wdir,
+              Etmp: weatherData.Etmp,
+            }),
+          }
+        );
 
         const windData = await windForecastRes.json();
 
-        const solarForecastRes = await fetch("http://localhost:8000/api/predict/solar_forecast", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lngLat: [lng, lat] }),
-        });
+        const solarForecastRes = await fetch(
+          "http://localhost:8000/api/predict/solar_forecast",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lngLat: [lng, lat] }),
+          }
+        );
 
         const solarData = await solarForecastRes.json();
 
@@ -140,15 +171,20 @@ const EnergyForecast = ({
       }
     };
 
+    if (showForecast) {
+      fetchForecasts();
+    }
+
     if (showForecast) fetchForecasts();
-  }, [coordinates, showForecast]);
+  }, [showForecast]);
 
   const labelMap = {
     emissions: "Emissions",
     landUse: "Land Use",
     waterUse: "Water Use",
     cost: "Cost per kWh",
-    scalability: "Scalability"
+    scalability: "Scalability",
+    scalability: "Scalability",
   };
 
   const sustainabilityBarData =
@@ -164,7 +200,7 @@ const EnergyForecast = ({
     <>
       <div className="flex justify-center">
         <button
-          className="bg-blue-300 p-2 rounded-full cursor-pointer mt-2"
+          className="bg-gradient-to-r from-violet-600 to-indigo-600 p-2 rounded-full cursor-pointer mt-2"
           onClick={() => setShowForecast(true)}
         >
           Show Details

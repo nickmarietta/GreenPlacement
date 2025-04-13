@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { AnimatePresence } from "motion/react";
 import { useMapData } from "../pages/MapPage";
@@ -18,7 +17,7 @@ const InfoPanel = () => {
   const [loading, isLoading] = useState(false);
 
   const handleAddEnergySource = () => {
-    setEnergySource((prev) => prev += 1);
+    setEnergySource((prev) => (prev += 1));
   };
 
   const handleCalculateEnergyOutput = async () => {
@@ -34,40 +33,64 @@ const InfoPanel = () => {
           isLoading(true);
 
           // Get wind features
-          const weatherRes = await fetch("http://localhost:8000/api/get-weather-features", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lngLat: [lng, lat] }),
-          });
+          const weatherRes = await fetch(
+            "http://localhost:8000/api/get-weather-features",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ lngLat: [lng, lat] }),
+            }
+          );
           const weatherData = await weatherRes.json();
 
           // Predict wind energy
-          const windRes = await fetch("http://localhost:8000/api/predict/wind", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(weatherData),
-          });
+          const windRes = await fetch(
+            "http://localhost:8000/api/predict/wind",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(weatherData),
+            }
+          );
           const windOutput = await windRes.json();
 
           // Get solar features
-          const solarRes = await fetch("http://localhost:8000/api/get-solar-features", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lngLat: [lng, lat] }),
-          });
+          const solarRes = await fetch(
+            "http://localhost:8000/api/get-solar-features",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ lngLat: [lng, lat] }),
+            }
+          );
           const solarData = await solarRes.json();
 
           // Predict solar energy
-          const solarPredictRes = await fetch("http://localhost:8000/api/predict/solar", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(solarData),
-          });
+          const solarPredictRes = await fetch(
+            "http://localhost:8000/api/predict/solar",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(solarData),
+            }
+          );
           const solarOutput = await solarPredictRes.json();
 
           const BASE_SCORES = {
-            wind: { emissions: 10, landUse: 8, waterUse: 10, cost: 9, scalability: 8 },
-            solar: { emissions: 8, landUse: 7, waterUse: 10, cost: 8, scalability: 7 },
+            wind: {
+              emissions: 10,
+              landUse: 8,
+              waterUse: 10,
+              cost: 9,
+              scalability: 8,
+            },
+            solar: {
+              emissions: 8,
+              landUse: 7,
+              waterUse: 10,
+              cost: 8,
+              scalability: 7,
+            },
           };
 
           const windScore = { ...BASE_SCORES.wind };
@@ -92,7 +115,7 @@ const InfoPanel = () => {
             windScore.landUse -= 1;
             windScore.waterUse -= 1;
           }
-          Object.keys(windScore).forEach(key => {
+          Object.keys(windScore).forEach((key) => {
             windScore[key] = Math.max(1, Math.min(10, windScore[key]));
           });
 
@@ -129,7 +152,7 @@ const InfoPanel = () => {
             solarScore.landUse -= 1;
             solarScore.waterUse -= 1;
           }
-          Object.keys(solarScore).forEach(key => {
+          Object.keys(solarScore).forEach((key) => {
             solarScore[key] = Math.max(1, Math.min(10, solarScore[key]));
           });
 
@@ -158,21 +181,34 @@ const InfoPanel = () => {
     });
   };
 
+  const handleReset = () => {
+    markers.forEach((marker) => {
+      marker.marker.remove();
+    });
+    setMarkers([]);
+  };
+
   return (
-    <div className="w-1/2 bg-gray-300 p-2 flex flex-col gap-2 overflow-y-auto h-screen">
-      <div className="flex flex-col gap-2 bg-gray-100 rounded-lg p-2">
+    <div className="text-white w-1/2 bg-gradient-to-t from-gray-800 to-blue-900 p-2 flex flex-col gap-2 overflow-y-auto h-screen">
+      <div className="flex flex-col gap-2 bg-gray-800 rounded-lg p-2">
         <p className="text-gray-500 text-sm">Tool box</p>
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-2">
           <button
-            className="bg-white p-2 rounded-full cursor-pointer"
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 p-2 rounded-full cursor-pointer"
             onClick={() => handleAddEnergySource("marker")}
           >
-            Marker
+            Add Marker
+          </button>
+          <button
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-2 rounded-full cursor-pointer"
+            onClick={() => handleReset()}
+          >
+            Reset
           </button>
         </div>
       </div>
-      <div className="bg-gray-100 rounded-lg p-2">
-        <p className="text-gray-500 text-sm">Coordinates</p>
+      <div className="bg-gray-800 rounded-lg p-2">
+        <p className="text-gray-500 text-sm">Current Coordinates</p>
         {coordinates?.map((coord, index) => (
           <p key={`coord-${index}`}>
             {index === 0
@@ -183,7 +219,7 @@ const InfoPanel = () => {
       </div>
       <div className="flex justify-center flex-col gap-2">
         <button
-          className="bg-green-300 p-2 rounded-full cursor-pointer"
+          className="bg-gradient-to-r from-violet-600 to-indigo-600 p-2 rounded-full cursor-pointer"
           onClick={handleCalculateEnergyOutput}
         >
           Calculate Energy Output
