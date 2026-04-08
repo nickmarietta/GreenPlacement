@@ -8,8 +8,10 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
 import joblib
 import matplotlib.pyplot as plt
+import os
 
-df = pd.read_csv(r'C:\GreenPlacement\backend\app\ml\spg.csv')
+ML_DIR = os.path.dirname(os.path.abspath(__file__))
+df = pd.read_csv(os.path.join(ML_DIR, "spg.csv"))
 
 #Feature Engineering
 df['temp_rad'] = df['temperature_2_m_above_gnd'] * df['shortwave_radiation_backwards_sfc']
@@ -83,7 +85,7 @@ print(f"MSE: {mse:.4f}")
 print(f"R² Score: {r2:.4f}")'''
 
 
-#Save Model and scalers
-model.save("solarprediction_model.keras")
-joblib.dump(sc_X, "scaler_input.pkl")
-joblib.dump(sc_y, "scaler_output.pkl")
+# Save model and scalers next to this script (same paths model_loader expects)
+model.save(os.path.join(ML_DIR, "solarprediction_model.keras"))
+joblib.dump(sc_X, os.path.join(ML_DIR, "scaler_input.pkl"))
+joblib.dump(sc_y, os.path.join(ML_DIR, "scaler_output.pkl"))
